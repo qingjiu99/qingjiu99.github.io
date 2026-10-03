@@ -1,0 +1,267 @@
+:root {
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --text: #2b2f36;
+  --muted: #7a828e;
+  --accent: #4f6ef7;
+  --accent-soft: #eef1fe;
+  --border: #e6e8ee;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ---------- 顶部导航 ---------- */
+.site-header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.site-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.site-title:hover { text-decoration: none; color: var(--accent); }
+.site-nav a {
+  margin-left: 20px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.site-nav a:hover { color: var(--accent); text-decoration: none; }
+
+.main { padding: 32px 20px 56px; }
+
+/* ---------- 首页文章卡片 ---------- */
+.post-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.post-card:hover {
+  box-shadow: 0 6px 20px rgba(43, 47, 54, 0.08);
+  transform: translateY(-2px);
+}
+.post-title { margin: 0 0 8px; font-size: 22px; line-height: 1.4; }
+.post-card .post-title a { color: var(--text); }
+.post-card .post-title a:hover { color: var(--accent); text-decoration: none; }
+
+.post-meta {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.post-meta a { color: var(--muted); }
+.post-meta a:hover { color: var(--accent); }
+.meta-sep { margin: 0 6px; }
+
+.post-excerpt {
+  color: #4a5160;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.post-excerpt p { margin: 0 0 8px; }
+
+.read-more { font-size: 14px; font-weight: 600; }
+
+/* ---------- 文章正文页 ---------- */
+.post {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 36px;
+}
+.post .post-title { font-size: 28px; }
+
+.post-content { font-size: 16px; color: #343a46; }
+.post-content h1, .post-content h2, .post-content h3 { margin-top: 1.6em; line-height: 1.35; }
+.post-content h2 { font-size: 22px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.post-content h3 { font-size: 18px; }
+.post-content img { max-width: 100%; border-radius: 8px; }
+.post-content blockquote {
+  margin: 1em 0;
+  padding: 4px 16px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 8px 8px 0;
+  color: #4a5160;
+}
+.post-content code {
+  background: #f0f1f5;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+  font-family: Consolas, "Courier New", monospace;
+}
+.post-content pre {
+  background: #1e2129;
+  color: #e6e8ee;
+  padding: 16px 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 14px;
+}
+.post-content pre code { background: transparent; padding: 0; color: inherit; }
+
+/* ---------- 正文 Markdown 表格 ---------- */
+.post-content > table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+.post-content th, .post-content td { border: 1px solid var(--border); padding: 8px 12px; }
+.post-content th { background: #f4f5f8; }
+
+/* ---------- 语法高亮代码块 ----------
+   注意：Hexo 开启 line_number 后，代码块是用 <table> 实现行号的
+   （<figure class="highlight"><table>...<td class="gutter">）。
+   它不能被上面的通用表格样式命中，否则会出现两个问题：
+   1. 行号被画上边框；
+   2. td 与 pre 的内边距叠加，长代码会把窄屏页面撑出横向溢出。 */
+.post-content figure.highlight {
+  margin: 1em 0;
+  background: #1e2129;
+  border-radius: 8px;
+  overflow-x: auto;          /* 横向滚动收在这一层，不污染整个页面 */
+}
+.post-content figure.highlight table {
+  width: auto;
+  min-width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+}
+.post-content figure.highlight th,
+.post-content figure.highlight td {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  vertical-align: top;
+}
+.post-content figure.highlight pre {
+  margin: 0;
+  padding: 16px 20px;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+.post-content figure.highlight .gutter pre {
+  padding-right: 0;
+  color: #6b7280;
+  text-align: right;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.post-content figure.highlight .code pre { padding-left: 14px; }
+
+/* 上一篇 / 下一篇 */
+.post-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+.nav-next { margin-left: auto; }
+
+/* ---------- 归档 ---------- */
+.page-title { font-size: 26px; }
+.archive-year { margin-bottom: 24px; }
+.year-title { font-size: 18px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.archive-list { list-style: none; padding: 0; }
+.archive-list li {
+  display: flex;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 15px;
+}
+.archive-list time { color: var(--muted); font-size: 13px; padding-top: 2px; }
+.archive-list a { color: var(--text); }
+.archive-list a:hover { color: var(--accent); }
+
+/* ---------- 分页 ---------- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+.pagination a, .pagination span {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+}
+.pagination .current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.pagination a:hover { border-color: var(--accent); text-decoration: none; }
+
+/* ---------- 访问统计（不蒜子）---------- */
+.site-stats {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.site-stats span { color: var(--accent); font-weight: 600; }
+.page-views { color: var(--muted); }
+.page-views span { color: var(--accent); font-weight: 600; }
+
+/* ---------- 页脚 ---------- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  padding: 20px 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.site-footer a { color: var(--muted); }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 560px) {
+  .header-inner { height: 52px; }
+  .site-nav a { margin-left: 14px; }
+  .post-card { padding: 20px; }
+  .post { padding: 22px 20px; }
+  .post .post-title { font-size: 23px; }
+  /* 窄屏下正文表格允许横向滚动，避免内容撑破页面宽度 */
+  .post-content > table { display: block; overflow-x: auto; }
+  /* 表格单元格里的长代码串允许断行，防止撑破单元格 */
+  .post-content > table code { overflow-wrap: anywhere; }
+  .post-content figure.highlight pre { font-size: 12.5px; padding: 14px 12px; }
+}

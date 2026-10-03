@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markdown 常用语法速查（附我踩过的坑） | 清酒孤灯的博客</title>
+<meta name="description" content="一个用 Hexo 搭建的个人静态博客，记录生活、技术与思考。">
+<link rel="stylesheet" href="/css/style.css">
+
+<body>
+  <header class="site-header">
+  <div class="container header-inner">
+    <a class="site-title" href="/">清酒孤灯的博客</a>
+    <nav class="site-nav">
+      <a href="/">首页</a>
+      <a href="/archives/">归档</a>
+      <a href="/about/">关于</a>
+    </nav>
+  </div>
+</header>
+
+  <main class="container main">
+    <article class="post">
+  <h1 class="post-title">Markdown 常用语法速查（附我踩过的坑）</h1>
+  <div class="post-meta">
+    <time datetime="2026-10-02">2026年10月02日</time>
+    
+      <span class="meta-sep">·</span>
+      
+        <a class="cat" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>
+      
+    
+    
+      <span class="meta-sep">·</span>
+      
+        <a class="tag" href="/tags/Markdown/">#Markdown</a>
+      
+        <a class="tag" href="/tags/%E5%86%99%E4%BD%9C/">#写作</a>
+      
+    
+    <span class="meta-sep">·</span>
+    <span class="page-views">阅读 <span id="busuanzi_value_page_pv">--</span></span>
+  </div>
+  <div class="post-content">
+    <p>写博客这些天，把常用的 Markdown 语法整理了一遍。这份速查表既是给自己以后翻，也给同样刚开始写的朋友省点事——顺带把我自己踩过的坑都记下来。</p>
+<span id="more"></span>
+
+<h2 id="为什么写这个"><a href="#为什么写这个" class="headerlink" title="为什么写这个"></a>为什么写这个</h2><p>Markdown 的设计理念是「用最少的符号，表达最基本的排版」。它没有复杂的菜单和按钮，所有格式都靠几个符号敲出来。</p>
+<p>好处是<strong>上手极快</strong>，坏处是<strong>有些符号长得像、容易记混</strong>——比如链接和图片只差一个感叹号。所以下面按用途分类整理，需要哪条查哪条。</p>
+<h2 id="一、标题"><a href="#一、标题" class="headerlink" title="一、标题"></a>一、标题</h2><p>用 <code>#</code> 表示层级，几个 <code>#</code> 就是几级标题：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># 一级标题</span></span><br><span class="line"><span class="section">## 二级标题</span></span><br><span class="line"><span class="section">### 三级标题</span></span><br><span class="line"><span class="section">#### 四级标题</span></span><br></pre></td></tr></table></figure>
+
+<p>渲染效果就是本文这样，<code>##</code> 会带一条下划线分隔。</p>
+<blockquote>
+<p>⚠️ <strong><code>#</code> 后面必须有一个空格</strong>。写成 <code>#标题</code> 是不生效的，会原样显示出来。</p>
+</blockquote>
+<h2 id="二、强调"><a href="#二、强调" class="headerlink" title="二、强调"></a>二、强调</h2><table>
+<thead>
+<tr>
+<th>效果</th>
+<th>写法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>加粗</strong></td>
+<td><code>**加粗**</code></td>
+</tr>
+<tr>
+<td><em>斜体</em></td>
+<td><code>*斜体*</code></td>
+</tr>
+<tr>
+<td><em><strong>加粗斜体</strong></em></td>
+<td><code>***加粗斜体***</code></td>
+</tr>
+<tr>
+<td><del>删除线</del></td>
+<td><code>~~删除线~~</code></td>
+</tr>
+<tr>
+<td><code>行内代码</code></td>
+<td>用一对反引号 <code>`</code> 包起来</td>
+</tr>
+</tbody></table>
+<p>行内代码很适合写命令名、文件名、字段名，比如 <code>_config.yml</code>、<code>npx hexo d</code>。</p>
+<h2 id="三、链接与图片"><a href="#三、链接与图片" class="headerlink" title="三、链接与图片"></a>三、链接与图片</h2><p>这两个长得几乎一样，<strong>图片只多一个感叹号</strong>：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">显示的文字</span>](<span class="link">https://example.com</span>)          ← 链接</span><br><span class="line">![<span class="string">替代文字</span>](<span class="link">https://example.com/a.png</span>)      ← 图片</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>链接</strong>：方括号里是点击时看到的文字</li>
+<li><strong>图片</strong>：方括号里是「替代文字」。图片加载不出来时会显示它，鼠标悬停时也会显示。<strong>圆括号里只能放图片网址</strong>。</li>
+</ul>
+<p>这是最容易写错的一条，我在下面「踩过的坑」里专门说了。</p>
+<h2 id="四、列表"><a href="#四、列表" class="headerlink" title="四、列表"></a>四、列表</h2><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> 无序列表</span><br><span class="line"><span class="bullet">-</span> 第二项</span><br><span class="line"><span class="bullet">  -</span> 缩进两个空格就是子列表</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> 有序列表</span><br><span class="line"><span class="bullet">2.</span> 第二项</span><br></pre></td></tr></table></figure>
+
+<p>列表项之间不空行，会渲染成紧凑的一坨；<strong>空一行就会变松散</strong>，行距更大。写文章按需选择。</p>
+<h2 id="五、引用"><a href="#五、引用" class="headerlink" title="五、引用"></a>五、引用</h2><p>用 <code>&gt;</code> 开头，适合放提示、补充说明：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="quote">&gt; 这是一段引用。</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>效果就是这样，左边会有一条竖线。</p>
+</blockquote>
+<h2 id="六、代码"><a href="#六、代码" class="headerlink" title="六、代码"></a>六、代码</h2><p><strong>行内代码</strong>用一对反引号包起来，比如 <code>_config.yml</code>、<code>npx hexo d</code>。</p>
+<p><strong>整段代码</strong>用三个反引号包住开头和结尾，并可以在开头的反引号后面标注语言，让关键词有高亮：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">hello</span>(<span class="params">name</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Hello, &#x27;</span> + name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>开头那个 <code>js</code> 就是语言标记，换成 <code>bash</code>、<code>cmd</code>、<code>yaml</code>、<code>markdown</code>、<code>text</code> 都可以。不标也能用，只是没有语法高亮。</p>
+<p>代码块渲染出来是带行号的，效果可以看<a href="/2026/10/01/hexo-publish-playbook/">这里</a>。</p>
+<h2 id="七、表格"><a href="#七、表格" class="headerlink" title="七、表格"></a>七、表格</h2><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">| 表头一 | 表头二 |</span><br><span class="line">| --- | --- |</span><br><span class="line">| 内容 | 内容 |</span><br></pre></td></tr></table></figure>
+
+<p>第二行的 <code>| --- | --- |</code> 是<strong>必须的</strong>，它告诉解析器这是表格而不是普通文字。</p>
+<blockquote>
+<p>💡 表格列数多的时候，与其在源码里对齐空格，不如随便写、让它自己渲染——源码对齐纯属自我感动，渲染出来都一样。</p>
+</blockquote>
+<h2 id="八、分割线"><a href="#八、分割线" class="headerlink" title="八、分割线"></a>八、分割线</h2><p>单独一行写三个减号：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>渲染出来是一条横线。</p>
+<blockquote>
+<p>⚠️ <strong>小心</strong>：文章<strong>开头</strong>如果出现 <code>---</code>，它表示的是 front-matter 的开始，不是分割线。所以正文里用分割线时，别放在第一行。</p>
+</blockquote>
+<h2 id="九、Hexo-专属的两个标记"><a href="#九、Hexo-专属的两个标记" class="headerlink" title="九、Hexo 专属的两个标记"></a>九、Hexo 专属的两个标记</h2><p>上面是通用 Markdown，下面这两条是 Hexo 特有的，<strong>只有写博客才用得到</strong>。</p>
+<h3 id="1-front-matter（文件开头那段）"><a href="#1-front-matter（文件开头那段）" class="headerlink" title="1. front-matter（文件开头那段）"></a>1. front-matter（文件开头那段）</h3><p>每篇文章<strong>必须</strong>以它开头，否则 Hexo 根本不认这篇文章：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">date: 2026-10-02 01:00:00</span><br><span class="line">tags: [随笔, 博客]</span><br><span class="line"><span class="section">categories: [生活]</span></span><br><span class="line"><span class="section">---</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>文章标题</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>决定排序，首页按时间倒序</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>标签，方括号包裹，多个用逗号隔开</td>
+</tr>
+<tr>
+<td><code>categories</code></td>
+<td>分类，写法同上</td>
+</tr>
+</tbody></table>
+<p>用 <code>npx hexo new &quot;标题&quot;</code> 建文件的话，这段骨架会自动生成好。</p>
+<h3 id="2-摘要分隔符"><a href="#2-摘要分隔符" class="headerlink" title="2. 摘要分隔符"></a>2. 摘要分隔符</h3><p>在摘要和正文之间，单独加一行 HTML 注释，内容是 <code>more</code> 这个词：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- more --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这行<strong>上面</strong>的内容会显示在首页列表里当摘要，<strong>下面</strong>的内容要点「阅读全文」才看得到。</p>
+<p>不写也能用，只是首页会把整篇全文铺出来，列表会变得很长。</p>
+<h2 id="十、我实际踩过的三个坑"><a href="#十、我实际踩过的三个坑" class="headerlink" title="十、我实际踩过的三个坑"></a>十、我实际踩过的三个坑</h2><p>这部分是重点，都是我真实踩到、而且<strong>不报错</strong>的坑——最难受的就是这种。</p>
+<h3 id="坑一：图片语法套娃"><a href="#坑一：图片语法套娃" class="headerlink" title="坑一：图片语法套娃"></a>坑一：图片语法套娃</h3><p>我一开始这么写：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![<span class="string">AI辅助</span>](<span class="link">![截图.png](https://example.com/a.png</span>))</span><br></pre></td></tr></table></figure>
+
+<p>想的是「给图片加个替代文字，再写上文件名」。结果<strong>页面上是一张裂图</strong>。</p>
+<p>原因：解析器把圆括号里的 <code>![截图.png](https://...)</code> 整串当成了图片地址，于是生成了一个不存在的路径。</p>
+<p><strong>正确写法</strong>——圆括号里只放网址：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![<span class="string">AI辅助</span>](<span class="link">https://example.com/a.png</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>记住</strong>：<code>![替代文字]</code> 和 <code>(图片地址)</code> 是<strong>一组</strong>，替代文字只能放方括号里，不能再套一层。</p>
+<h3 id="坑二：文章「消失」"><a href="#坑二：文章「消失」" class="headerlink" title="坑二：文章「消失」"></a>坑二：文章「消失」</h3><p>我在 <code>source\_posts\</code> 下新建了一个 <code>.md</code>，写得好好的，发布也显示成功，<strong>但文章就是不在网站上</strong>。</p>
+<p>原因：<strong>文件开头漏了 front-matter</strong>。Hexo 遇到没有 front-matter 的文件会<strong>直接跳过</strong>——不报错、不提示，静默忽略。</p>
+<p>所以遇到「发布成功但文章找不到」，第一件事就是检查文件头两行是不是 <code>---</code>。</p>
+<h3 id="坑三：段落之间必须空行"><a href="#坑三：段落之间必须空行" class="headerlink" title="坑三：段落之间必须空行"></a>坑三：段落之间必须空行</h3><p>Markdown 里<strong>一个换行不算换行</strong>。想让两段分开，中间必须空一行：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">这是第一段。</span><br><span class="line">这是第二段。      ← 渲染后会和上面挤在同一段</span><br><span class="line"></span><br><span class="line">这是第一段。</span><br><span class="line"></span><br><span class="line">这是第二段。      ← 这样才对</span><br></pre></td></tr></table></figure>
+
+<p>这个坑很隐蔽，因为<strong>源码里看起来是分成两行的</strong>，但渲染出来变成了一坨。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Markdown 的语法一共就这么点东西，写个三五篇文章就熟练了。</p>
+<p>真正常用的其实只有四五个：标题、加粗、链接、图片、代码块。其余的记不住也没关系——需要的时候翻一下就行，比如现在这篇。</p>
+<hr>
+<p><strong>参考</strong>：本文的渲染效果可以直接对照<a href="/2026/10/01/build-blog-with-deepseek/">我的建站记录</a>，那篇里有更多实际写作用的例子。</p>
+
+  </div>
+
+  <nav class="post-nav">
+    
+      <a class="nav-prev" href="/2026/10/02/blog-web-admin-and-auto-deploy/">← 给博客装上网页后台和自动发布</a>
+    
+    
+      <a class="nav-next" href="/2026/10/02/blog-homepage-rebuilt-with-ai/">记录一下我的博客主页搭建成功 →</a>
+    
+  </nav>
+</article>
+
+  </main>
+  <footer class="site-footer">
+  <div class="container">
+    <p class="site-stats">
+      总访问量 <span id="busuanzi_value_site_pv">--</span> 次
+      <span class="meta-sep">·</span>
+      访客数 <span id="busuanzi_value_site_uv">--</span> 人
+    </p>
+    <p>© 2026 清酒孤灯 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动</p>
+  </div>
+</footer>
+<script defer src="https://vercount.one/js"></script>
+
+</body>
+</html>

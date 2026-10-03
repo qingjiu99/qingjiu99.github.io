@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用 Hexo 搭建个人博客的完整记录 | 清酒孤灯的博客</title>
+<meta name="description" content="一个用 Hexo 搭建的个人静态博客，记录生活、技术与思考。">
+<link rel="stylesheet" href="/css/style.css">
+
+<body>
+  <header class="site-header">
+  <div class="container header-inner">
+    <a class="site-title" href="/">清酒孤灯的博客</a>
+    <nav class="site-nav">
+      <a href="/">首页</a>
+      <a href="/archives/">归档</a>
+      <a href="/about/">关于</a>
+    </nav>
+  </div>
+</header>
+
+  <main class="container main">
+    <article class="post">
+  <h1 class="post-title">用 Hexo 搭建个人博客的完整记录</h1>
+  <div class="post-meta">
+    <time datetime="2026-09-29">2026年09月29日</time>
+    
+      <span class="meta-sep">·</span>
+      
+        <a class="cat" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>
+      
+    
+    
+      <span class="meta-sep">·</span>
+      
+        <a class="tag" href="/tags/Hexo/">#Hexo</a>
+      
+        <a class="tag" href="/tags/%E5%BB%BA%E7%AB%99/">#建站</a>
+      
+    
+    <span class="meta-sep">·</span>
+    <span class="page-views">阅读 <span id="busuanzi_value_page_pv">--</span></span>
+  </div>
+  <div class="post-content">
+    <p>这篇记录了本站从零搭建的全过程，方便以后维护，也给想搭博客的朋友一个参考。</p>
+<span id="more"></span>
+
+<h2 id="环境要求"><a href="#环境要求" class="headerlink" title="环境要求"></a>环境要求</h2><ul>
+<li>Node.js 12+（推荐 18 以上）</li>
+<li>npm 或 yarn</li>
+</ul>
+<h2 id="搭建步骤"><a href="#搭建步骤" class="headerlink" title="搭建步骤"></a>搭建步骤</h2><h3 id="1-初始化项目"><a href="#1-初始化项目" class="headerlink" title="1. 初始化项目"></a>1. 初始化项目</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">npm init -y</span><br><span class="line">npm install hexo hexo-server hexo-deployer-git \</span><br><span class="line">  hexo-generator-index hexo-generator-archive \</span><br><span class="line">  hexo-generator-category hexo-generator-tag \</span><br><span class="line">  hexo-renderer-ejs hexo-renderer-marked</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-配置站点"><a href="#2-配置站点" class="headerlink" title="2. 配置站点"></a>2. 配置站点</h3><p>编辑 <code>_config.yml</code>，填入站点标题、作者、语言、时区等信息。</p>
+<h3 id="3-选择或编写主题"><a href="#3-选择或编写主题" class="headerlink" title="3. 选择或编写主题"></a>3. 选择或编写主题</h3><p>主题放在 <code>themes/</code> 目录下，本项目使用自研的 <code>aurora</code> 主题，结构如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">themes/aurora/</span><br><span class="line">├── layout/</span><br><span class="line">│   ├── layout.ejs      # 页面骨架</span><br><span class="line">│   ├── index.ejs       # 首页（文章列表）</span><br><span class="line">│   ├── post.ejs        # 文章详情</span><br><span class="line">│   ├── page.ejs        # 独立页面</span><br><span class="line">│   ├── archive.ejs     # 归档</span><br><span class="line">│   └── _partial/       # 公共片段</span><br><span class="line">└── source/</span><br><span class="line">    └── css/style.css   # 样式</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-写文章并生成"><a href="#4-写文章并生成" class="headerlink" title="4. 写文章并生成"></a>4. 写文章并生成</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;文章标题&quot;</span>      <span class="comment"># 新建文章</span></span><br><span class="line">hexo generate            <span class="comment"># 生成静态文件</span></span><br><span class="line">hexo server              <span class="comment"># 本地预览 http://localhost:4000</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-部署上线"><a href="#5-部署上线" class="headerlink" title="5. 部署上线"></a>5. 部署上线</h3><p>在 <code>_config.yml</code> 的 <code>deploy</code> 中填入 Git 仓库地址，然后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo deploy</span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令速查"><a href="#常用命令速查" class="headerlink" title="常用命令速查"></a>常用命令速查</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hexo new &lt;title&gt;</code></td>
+<td>新建文章</td>
+</tr>
+<tr>
+<td><code>hexo generate</code> &#x2F; <code>hexo g</code></td>
+<td>生成静态文件</td>
+</tr>
+<tr>
+<td><code>hexo server</code> &#x2F; <code>hexo s</code></td>
+<td>本地预览</td>
+</tr>
+<tr>
+<td><code>hexo deploy</code> &#x2F; <code>hexo d</code></td>
+<td>部署到远端</td>
+</tr>
+<tr>
+<td><code>hexo clean</code></td>
+<td>清理缓存</td>
+</tr>
+</tbody></table>
+<p>搭建博客最难的不是技术，而是开始写。祝大家都能拥有自己的小天地。</p>
+
+  </div>
+
+  <nav class="post-nav">
+    
+      <a class="nav-prev" href="/2026/10/01/hello-world/">← 你好，世界</a>
+    
+    
+      <a class="nav-next" href="/2026/09/15/about-writing/">关于写作这件事 →</a>
+    
+  </nav>
+</article>
+
+  </main>
+  <footer class="site-footer">
+  <div class="container">
+    <p class="site-stats">
+      总访问量 <span id="busuanzi_value_site_pv">--</span> 次
+      <span class="meta-sep">·</span>
+      访客数 <span id="busuanzi_value_site_uv">--</span> 人
+    </p>
+    <p>© 2026 清酒孤灯 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动</p>
+  </div>
+</footer>
+<script defer src="https://vercount.one/js"></script>
+
+</body>
+</html>

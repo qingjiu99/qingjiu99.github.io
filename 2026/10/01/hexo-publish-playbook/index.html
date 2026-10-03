@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hexo 博客发布手册：每次更新照这个来 | 清酒孤灯的博客</title>
+<meta name="description" content="一个用 Hexo 搭建的个人静态博客，记录生活、技术与思考。">
+<link rel="stylesheet" href="/css/style.css">
+
+<body>
+  <header class="site-header">
+  <div class="container header-inner">
+    <a class="site-title" href="/">清酒孤灯的博客</a>
+    <nav class="site-nav">
+      <a href="/">首页</a>
+      <a href="/archives/">归档</a>
+      <a href="/about/">关于</a>
+    </nav>
+  </div>
+</header>
+
+  <main class="container main">
+    <article class="post">
+  <h1 class="post-title">Hexo 博客发布手册：每次更新照这个来</h1>
+  <div class="post-meta">
+    <time datetime="2026-10-01">2026年10月01日</time>
+    
+      <span class="meta-sep">·</span>
+      
+        <a class="cat" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>
+      
+    
+    
+      <span class="meta-sep">·</span>
+      
+        <a class="tag" href="/tags/Hexo/">#Hexo</a>
+      
+        <a class="tag" href="/tags/%E5%BB%BA%E7%AB%99/">#建站</a>
+      
+        <a class="tag" href="/tags/GitHub-Pages/">#GitHub Pages</a>
+      
+    
+    <span class="meta-sep">·</span>
+    <span class="page-views">阅读 <span id="busuanzi_value_page_pv">--</span></span>
+  </div>
+  <div class="post-content">
+    <p>博客搭好之后，真正高频、也真正容易出错的其实是<strong>发布</strong>这个动作。这篇是一份可以照着敲的操作手册——不讲解原理，只给命令和排错表。</p>
+<p>搭建的完整过程见另一篇：<a href="/2026/10/01/build-blog-with-deepseek/">用 DeepSeek 从零搭建这个博客</a>。</p>
+<span id="more"></span>
+
+<h2 id="每次发布就这一块命令"><a href="#每次发布就这一块命令" class="headerlink" title="每次发布就这一块命令"></a>每次发布就这一块命令</h2><p>打开 CMD（Win+R 输入 <code>cmd</code>），把下面<strong>整块</strong>复制进去回车：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> &quot;<span class="built_in">PATH</span>=<span class="variable">%APPDATA%</span>\CherryStudio\Toolchain\mise\shims;<span class="variable">%PATH%</span>&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;HTTP_PROXY=http://<span class="number">127</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">7897</span>&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;HTTPS_PROXY=http://<span class="number">127</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">7897</span>&quot;</span><br><span class="line"><span class="built_in">cd</span> /d I:\my-blog</span><br><span class="line">npx hexo clean &amp;&amp; npx hexo generate &amp;&amp; npx hexo d</span><br></pre></td></tr></table></figure>
+
+<p>四条命令，缺一不可：</p>
+<table>
+<thead>
+<tr>
+<th>行</th>
+<th>作用</th>
+<th>漏了会怎样</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第 1 行</td>
+<td>把 Node 加进 PATH</td>
+<td>报 <code>&#39;npx&#39; 不是内部或外部命令</code></td>
+</tr>
+<tr>
+<td>第 2、3 行</td>
+<td>让 git 走代理</td>
+<td>报 <code>Failed to connect to github.com port 443</code></td>
+</tr>
+<tr>
+<td>第 4 行</td>
+<td>进入项目目录</td>
+<td>在错误目录执行，找不到配置</td>
+</tr>
+<tr>
+<td>第 5 行</td>
+<td>清理 → 生成 → 部署</td>
+<td>——</td>
+</tr>
+</tbody></table>
+<p>看到这两行就是成功了：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">To https://github.com/qingjiu99/qingjiu99.github.io.git</span><br><span class="line">   0351040..3fe3373  HEAD -&gt; main</span><br><span class="line">INFO  Deploy done: git</span><br></pre></td></tr></table></figure>
+
+<p>然后<strong>等 1～2 分钟</strong>再刷新网站——GitHub Pages 需要重新构建，这一步不能省。</p>
+<h2 id="三个前置条件"><a href="#三个前置条件" class="headerlink" title="三个前置条件"></a>三个前置条件</h2><p>发布能不能成功，取决于这三样。出问题先查这里，再查命令。</p>
+<h3 id="1-Node-js-可用"><a href="#1-Node-js-可用" class="headerlink" title="1. Node.js 可用"></a>1. Node.js 可用</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node -v</span><br></pre></td></tr></table></figure>
+
+<p>报错就是没装，或者没进 PATH。</p>
+<p>如果用的是 Cherry Studio 自带的 Node，位置在 <code>%APPDATA%\CherryStudio\Toolchain\mise\shims</code>，<strong>每次开新终端都要重新 <code>set</code> 一次</strong>（上面命令块的第 1 行）。想省掉这步，去 <a target="_blank" rel="noopener" href="https://nodejs.org/">nodejs.org</a> 装个 LTS 版，装完重启终端即可。</p>
+<h3 id="2-代理已启动"><a href="#2-代理已启动" class="headerlink" title="2. 代理已启动"></a>2. 代理已启动</h3><p>GitHub 直连不通，必须先开代理软件。</p>
+<p><strong>关键</strong>：光开着代理软件<strong>不一定够</strong>。git 底层用 libcurl，不一定读取系统代理设置，所以要用第 2、3 行显式指定端口。端口号填你代理软件的实际端口（Clash 常见 7890 &#x2F; 7897）。</p>
+<p>验证代理是否通：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -x http://127.0.0.1:7897 https://github.com</span><br></pre></td></tr></table></figure>
+
+<p>能返回内容就正常。不加 <code>-x</code> 参数测一次，如果直连不通、走代理通，就说明环境没问题。</p>
+<h3 id="3-仓库配置正确"><a href="#3-仓库配置正确" class="headerlink" title="3. 仓库配置正确"></a>3. 仓库配置正确</h3><p><code>_config.yml</code> 里：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/你的用户名/你的用户名.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">main</span></span><br></pre></td></tr></table></figure>
+
+<p>仓库名必须是 <strong><code>&lt;用户名&gt;.github.io</code></strong> 这种格式，这是 GitHub Pages 的命名规则。</p>
+<h2 id="完整发布流程"><a href="#完整发布流程" class="headerlink" title="完整发布流程"></a>完整发布流程</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">写文章 → 本地预览 → 生成 → 部署 → 等构建 → 刷新验证</span><br></pre></td></tr></table></figure>
+
+<h3 id="写文章"><a href="#写文章" class="headerlink" title="写文章"></a>写文章</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx hexo new &quot;文章标题&quot;</span><br></pre></td></tr></table></figure>
+
+<p>文件生成在 <code>source\_posts\</code> 下。写完记得填 front-matter：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">date: 2026-10-01 23:55:00</span><br><span class="line">tags: [标签一, 标签二]</span><br><span class="line"><span class="section">categories: [分类]</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line">首页显示的摘要部分。</span><br><span class="line"></span><br><span class="line">&lt;!-- more --&gt;</span><br><span class="line"></span><br><span class="line">正文内容。</span><br></pre></td></tr></table></figure>
+
+<p><code>&lt;!-- more --&gt;</code> 是摘要分隔符，不写的话首页会把全文铺出来。</p>
+<blockquote>
+<p>文件名会变成网址的一部分，<strong>建议用英文或拼音</strong>，中文标题写在 <code>title</code> 里就好。</p>
+</blockquote>
+<h3 id="本地预览"><a href="#本地预览" class="headerlink" title="本地预览"></a>本地预览</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx hexo server</span><br></pre></td></tr></table></figure>
+
+<p>打开 <code>http://localhost:4000</code> 看排版，确认后 <code>Ctrl+C</code> 停掉。<strong>这一步不需要代理</strong>，可以先在没网的情况下写完排版。</p>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx hexo clean &amp;&amp; npx hexo generate &amp;&amp; npx hexo d</span><br></pre></td></tr></table></figure>
+
+<p><code>generate</code> 成功会显示 <code>N files generated</code>。如果这一步就报错，说明是文章内容或配置的问题，和网络无关。</p>
+<h2 id="故障排查表"><a href="#故障排查表" class="headerlink" title="故障排查表"></a>故障排查表</h2><p>这张表是我实际踩过的坑，按”现象 → 原因 → 解决”排列：</p>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&#39;npx&#39; 不是内部或外部命令</code></td>
+<td>Node 不在 PATH</td>
+<td>命令块第 1 行不能漏</td>
+</tr>
+<tr>
+<td><code>Failed to connect to github.com port 443</code></td>
+<td>代理没开，或 git 没走代理</td>
+<td>开代理 + 保留 <code>HTTP_PROXY</code> &#x2F; <code>HTTPS_PROXY</code> 两行</td>
+</tr>
+<tr>
+<td>弹出 <code>Connect to GitHub</code> 授权窗口</td>
+<td>首次在新机器 &#x2F; 新环境发布时出现，凭据会缓存，之后通常不再弹</td>
+<td>保持「Browser&#x2F;Device」页，点 <strong>「Sign in with your browser」</strong></td>
+</tr>
+<tr>
+<td>登录窗口关不掉，但命令行已显示 <code>Deploy done</code></td>
+<td>GCM 的残留窗口，此时已无进程在等待它</td>
+<td><strong>直接点 ✕ 关掉</strong>，不要再点授权按钮</td>
+</tr>
+<tr>
+<td>网站显示的是旧内容 &#x2F; 别人的内容，新文章 404</td>
+<td>Pages 还在重建，看到的是上一次部署的旧站</td>
+<td><strong>等 1～2 分钟</strong>再刷新，别急着重配</td>
+</tr>
+<tr>
+<td>网站一直是 404</td>
+<td>仓库默认分支不是 <code>main</code></td>
+<td>仓库 Settings → Branches → 默认分支改为 <code>main</code></td>
+</tr>
+<tr>
+<td>内容确认已构建完成，但打开还是旧的</td>
+<td>浏览器缓存</td>
+<td><code>Ctrl+F5</code> 强制刷新</td>
+</tr>
+<tr>
+<td><code>Repository not found</code></td>
+<td>仓库名或账号不对</td>
+<td>检查 <code>_config.yml</code> 里的 <code>deploy.repo</code></td>
+</tr>
+</tbody></table>
+<p><strong>排查顺序建议</strong>：先看命令行输出到哪一步失败了，再对号入座查表。命令行有 <code>Deploy done</code> 但网站不对 → 问题在 Pages 构建或缓存；命令行就报错了 → 问题在环境或配置。</p>
+<h2 id="命令速查"><a href="#命令速查" class="headerlink" title="命令速查"></a>命令速查</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+<th>需要代理？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npx hexo new &quot;标题&quot;</code></td>
+<td>新建文章</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo generate</code>（<code>g</code>）</td>
+<td>本地生成</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo server</code>（<code>s</code>）</td>
+<td>本地预览 <code>localhost:4000</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo clean</code></td>
+<td>清理缓存</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo deploy</code>（<code>d</code>）</td>
+<td>部署到远端</td>
+<td><strong>是</strong></td>
+</tr>
+</tbody></table>
+<p>只有最后一步需要代理，写文章和预览都是纯本地的。</p>
+<hr>
+<p>把这块命令存成记事本放在手边，每次发布复制粘贴就行。发布这件事本身不难，难的是出错时知道问题出在哪一环——希望这张排查表能帮你省点时间。</p>
+
+  </div>
+
+  <nav class="post-nav">
+    
+      <a class="nav-prev" href="/2026/10/02/blog-homepage-rebuilt-with-ai/">← 记录一下我的博客主页搭建成功</a>
+    
+    
+      <a class="nav-next" href="/2026/10/01/build-blog-with-deepseek/">用 DeepSeek 从零搭建这个博客：完整教程 →</a>
+    
+  </nav>
+</article>
+
+  </main>
+  <footer class="site-footer">
+  <div class="container">
+    <p class="site-stats">
+      总访问量 <span id="busuanzi_value_site_pv">--</span> 次
+      <span class="meta-sep">·</span>
+      访客数 <span id="busuanzi_value_site_uv">--</span> 人
+    </p>
+    <p>© 2026 清酒孤灯 · 由 <a href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 驱动</p>
+  </div>
+</footer>
+<script defer src="https://vercount.one/js"></script>
+
+</body>
+</html>
