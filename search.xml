@@ -1,0 +1,1165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>关于写作这件事</title>
+    <url>/2026/09/15/about-writing/</url>
+    <content><![CDATA[<p>一直想找个地方，把自己思考过的东西沉淀下来。</p>
+<span id="more"></span>
+
+<h2 id="为什么要写"><a href="#为什么要写" class="headerlink" title="为什么要写"></a>为什么要写</h2><p>写下来的过程，其实是把自己脑子里模糊的想法重新整理一遍。很多以为自己想明白了的事，落笔的时候才发现漏洞百出。</p>
+<h2 id="写点什么"><a href="#写点什么" class="headerlink" title="写点什么"></a>写点什么</h2><ul>
+<li>技术踩坑记录，方便未来的自己</li>
+<li>读书笔记与摘抄</li>
+<li>生活里的观察和感悟</li>
+</ul>
+<p>写作不需要天赋，需要的是持续的记录。希望这个博客能陪我走过很久。</p>
+]]></content>
+      <categories>
+        <category>生活</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>给博客装上网页后台和自动发布</title>
+    <url>/2026/10/02/blog-web-admin-and-auto-deploy/</url>
+    <content><![CDATA[<p>博客上线之后，很快发现两个别扭的地方：<strong>只能在电脑上写</strong>，而且<strong>每次发布都要手动敲命令</strong>。这篇记录我怎么把这两个问题解决掉，顺便加上访问统计。</p>
+<span id="more"></span>
+
+<h2 id="问题在哪"><a href="#问题在哪" class="headerlink" title="问题在哪"></a>问题在哪</h2><p>静态博客有个天然的短板：没有后台。</p>
+<p>WordPress 那种动态博客，打开 <code>/wp-admin</code> 就能写文章、传图片、改设置。而 Hexo 生成的是纯静态网页，服务器上只有 HTML 文件，<strong>没有数据库、没有登录界面、没有任何管理入口</strong>。</p>
+<p>所以之前写一篇文章的流程是这样的：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">打开 VS Code → 改 Markdown → 存盘</span><br><span class="line">→ 切到 CMD → set 代理 → cd 项目 → npx hexo clean/generate/d</span><br><span class="line">→ 等 1-2 分钟 → 刷新网站确认</span><br></pre></td></tr></table></figure>
+
+<p>在家用电脑还行，出门在外想随手记点东西就完全没办法。</p>
+<p><strong>目标</strong>：手机上能写 + 提交后自动发布。</p>
+<h2 id="整体方案"><a href="#整体方案" class="headerlink" title="整体方案"></a>整体方案</h2><p>拆成三件事：</p>
+<table>
+<thead>
+<tr>
+<th>要解决的问题</th>
+<th>方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>没有编辑界面</td>
+<td>Pages CMS（网页版 Markdown 编辑器）</td>
+</tr>
+<tr>
+<td>每次要手动发布</td>
+<td>GitHub Actions（提交后自动构建发布）</td>
+</tr>
+<tr>
+<td>不知道有没有人看</td>
+<td>不蒜子（访问统计）</td>
+</tr>
+</tbody></table>
+<p>这三件事里，<strong>第二件是基础</strong> —— 因为网页后台改的是源码仓库里的 <code>.md</code> 文件，改完还需要重新生成才能上线。光有编辑器没有自动发布，在网页上写完还得回电脑敲命令，等于白装。</p>
+<h2 id="一、网页后台：为什么选-Pages-CMS"><a href="#一、网页后台：为什么选-Pages-CMS" class="headerlink" title="一、网页后台：为什么选 Pages CMS"></a>一、网页后台：为什么选 Pages CMS</h2><p>先说结论：<strong>没用 Decap CMS</strong>。</p>
+<p>Decap CMS（原 Netlify CMS）是最有名的静态博客后台，但它有个绕不开的麻烦 —— <strong>它的登录授权需要一个服务端</strong>。GitHub Pages 是纯静态托管，跑不了服务端，所以你得额外准备一个 OAuth 代理（Cloudflare Workers 之类），配置量一下就上去了。</p>
+<p>后来找到了 <a href="https://pagescms.org/">Pages CMS</a>，它的思路完全不同：</p>
+<blockquote>
+<p>内容直接存在你的 GitHub 仓库里，<strong>没有数据库、没有 API、没有额外后端</strong>。</p>
+</blockquote>
+<p>官方提供托管版，用 GitHub 账号登录就能用，不用自己部署任何东西。而且是开源的（MIT 协议）、免费、原生支持手机。</p>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>只需要在仓库根目录放一个 <code>.pages.yml</code>，告诉它文章在哪、有哪些字段：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">media:</span></span><br><span class="line">  <span class="attr">input:</span> <span class="string">source/images</span></span><br><span class="line">  <span class="attr">output:</span> <span class="string">/images</span></span><br><span class="line"></span><br><span class="line"><span class="attr">content:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">posts</span></span><br><span class="line">    <span class="attr">label:</span> <span class="string">文章</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">collection</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">source/_posts</span></span><br><span class="line">    <span class="attr">format:</span> <span class="string">yaml-frontmatter</span></span><br><span class="line">    <span class="attr">filename:</span></span><br><span class="line">      <span class="attr">template:</span> <span class="string">&quot;&#123;primary&#125;.md&quot;</span></span><br><span class="line">      <span class="attr">field:</span> <span class="string">create</span></span><br><span class="line">    <span class="attr">view:</span></span><br><span class="line">      <span class="attr">primary:</span> <span class="string">title</span></span><br><span class="line">      <span class="attr">sort:</span> <span class="string">date</span></span><br><span class="line">      <span class="attr">order:</span> <span class="string">desc</span></span><br><span class="line">    <span class="attr">fields:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">title</span></span><br><span class="line">        <span class="attr">label:</span> <span class="string">标题</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">        <span class="attr">required:</span> <span class="literal">true</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">date</span></span><br><span class="line">        <span class="attr">label:</span> <span class="string">日期</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">date</span></span><br><span class="line">        <span class="attr">required:</span> <span class="literal">true</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">tags</span></span><br><span class="line">        <span class="attr">label:</span> <span class="string">标签</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">        <span class="attr">list:</span> <span class="literal">true</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">categories</span></span><br><span class="line">        <span class="attr">label:</span> <span class="string">分类</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">        <span class="attr">list:</span> <span class="literal">true</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">body</span></span><br><span class="line">        <span class="attr">label:</span> <span class="string">正文</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">rich-text</span></span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>field: create</code> 是为了在新建文章时<strong>显示文件名输入框</strong> —— 原因下面「踩坑」那节会说，这个很关键。</p>
+<p>配好之后打开 <a href="https://app.pagescms.org/">https://app.pagescms.org/</a> 登录，就能看到文章列表，点进去直接编辑，保存即提交到仓库。</p>
+<h3 id="一个需要权衡的地方"><a href="#一个需要权衡的地方" class="headerlink" title="一个需要权衡的地方"></a>一个需要权衡的地方</h3><p>安装 Pages CMS 时，它会请求挺宽的权限：<strong>读写代码、Actions、Workflows、Administration</strong>。</p>
+<ul>
+<li><strong>读写代码</strong>是必需的 —— 编辑文章就是改文件，没这个它干不了活</li>
+<li>其余的（Actions &#x2F; Workflows &#x2F; Administration）是为了支持”在后台一键触发工作流”之类的功能，<strong>超出了最低需要</strong></li>
+</ul>
+<p>GitHub 的授权页是”要么全给、要么不装”，没有细粒度勾选。所以建议：**在授权时把仓库范围限制成”只选这一个仓库”**（默认是全选），别把其他项目的权限也一起交出去。</p>
+<h2 id="二、自动发布：GitHub-Actions"><a href="#二、自动发布：GitHub-Actions" class="headerlink" title="二、自动发布：GitHub Actions"></a>二、自动发布：GitHub Actions</h2><p>在源码仓库里加一个工作流文件，放在 <code>.github/workflows/deploy.yml</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">构建并发布博客</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span> [<span class="string">main</span>]</span><br><span class="line">  <span class="attr">workflow_dispatch:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build-and-deploy:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">检出源码</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">安装</span> <span class="string">Node</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&#x27;24&#x27;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">安装依赖</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">生成静态文件</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">发布到</span> <span class="string">GitHub</span> <span class="string">Pages</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">          <span class="attr">DEPLOY_TOKEN:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.DEPLOY_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">          cd public</span></span><br><span class="line"><span class="string">          git init -b main</span></span><br><span class="line"><span class="string">          git config user.name &quot;github-actions[bot]&quot;</span></span><br><span class="line"><span class="string">          git config user.email &quot;41898282+github-actions[bot]@users.noreply.github.com&quot;</span></span><br><span class="line"><span class="string">          git add -A</span></span><br><span class="line"><span class="string">          git commit -m &quot;自动发布：$(date -u &#x27;+%Y-%m-%d %H:%M:%S UTC&#x27;)&quot;</span></span><br><span class="line"><span class="string">          git push --force &quot;https://x-access-token:$&#123;DEPLOY_TOKEN&#125;@github.com/用户名/用户名.github.io.git&quot; main</span></span><br></pre></td></tr></table></figure>
+
+<p>逻辑很简单：<strong>检出源码 → 装依赖 → 生成静态文件 → 把 <code>public/</code> 目录推到网站仓库</strong>。</p>
+<h3 id="为什么要单独配一个令牌"><a href="#为什么要单独配一个令牌" class="headerlink" title="为什么要单独配一个令牌"></a>为什么要单独配一个令牌</h3><p>工作流在<strong>源码仓库</strong>里运行，但要往<strong>网站仓库</strong>推送 —— 这是跨仓库操作，GitHub 默认的 <code>GITHUB_TOKEN</code> 权限不够。</p>
+<p>所以要创建一个<strong>细粒度访问令牌（PAT）</strong>，并且<strong>把权限压到最小</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>仓库范围</td>
+<td>只选网站仓库，不选”所有仓库”</td>
+</tr>
+<tr>
+<td>权限</td>
+<td>只需要 <code>Contents: Read and write</code></td>
+</tr>
+<tr>
+<td>其他权限</td>
+<td>一个都不要给</td>
+</tr>
+</tbody></table>
+<p>创建后存进仓库的 <strong>Settings → Secrets and variables → Actions</strong>，名字叫 <code>DEPLOY_TOKEN</code>。</p>
+<p><strong>为什么要压到最小</strong>：这个令牌存在仓库里，虽然 GitHub 会加密，但权限越小，万一泄露的影响面就越小。它只负责推网页文件，给它访问其他仓库或者管理权限都是多余的。</p>
+<h2 id="三、访问统计：不蒜子"><a href="#三、访问统计：不蒜子" class="headerlink" title="三、访问统计：不蒜子"></a>三、访问统计：不蒜子</h2><p>这个最简单。在主题的页脚模板里加一段：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="string">&quot;https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后在想显示数字的地方放占位元素：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">总访问量 <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_value_site_pv&quot;</span>&gt;</span>--<span class="tag">&lt;/<span class="name">span</span>&gt;</span> 次</span><br><span class="line">访客数 <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_value_site_uv&quot;</span>&gt;</span>--<span class="tag">&lt;/<span class="name">span</span>&gt;</span> 人</span><br></pre></td></tr></table></figure>
+
+<p>文章页想显示单篇阅读量，就用另一个 ID：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">阅读 <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_value_page_pv&quot;</span>&gt;</span>--<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>脚本加载后会自己把数字填进去。选它是因为<strong>免注册、国内可访问</strong>（实测直连 200，1.7 秒），贴段代码就能用。</p>
+<p>代价是数据比较简单 —— 只有次数，看不到来源、地区、停留时长。想在后台看详细分析的话，百度统计或 Umami 更合适。</p>
+<h2 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h2><h3 id="文件名会变成网址"><a href="#文件名会变成网址" class="headerlink" title="文件名会变成网址"></a>文件名会变成网址</h3><p>Pages CMS 新建文章时，<strong>默认用标题生成文件名</strong>。标题写中文，文件名就是中文，网址会变成这样：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">/2026/10/02/%E8%AE%B0%E5%BD%95%E4%B8%80%E4%B8%8B/</span><br></pre></td></tr></table></figure>
+
+<p>能用，但分享出去很难看，也不利于记忆。</p>
+<p><strong>建议在新建时手动把文件名改成英文或拼音</strong>，标题照旧写中文。我在配置里专门打开了文件名输入框，就是为了这个。</p>
+<h3 id="工作流第一次跑会失败"><a href="#工作流第一次跑会失败" class="headerlink" title="工作流第一次跑会失败"></a>工作流第一次跑会失败</h3><p>令牌还没配好的时候，工作流一跑就会在最后一步失败。这是<strong>预期内的</strong> —— 它需要那个令牌才能往网站仓库推送。</p>
+<p>失败信息里会直接告诉你去哪里配置。配好之后在 Actions 页面点 <strong>Re-run all jobs</strong> 就行。</p>
+<h3 id="权限不广播"><a href="#权限不广播" class="headerlink" title="权限不广播"></a>权限不广播</h3><p>这个跟博客无关，但顺带记一下：Windows 上改完环境变量（PATH），<strong>已经打开的程序不会自动更新</strong>，它们还拿着启动那一刻的旧环境。</p>
+<p>所以改完 PATH 后要<strong>关掉所有相关的终端窗口重新开</strong>，或者直接重启电脑。</p>
+<h2 id="现在的写作流程"><a href="#现在的写作流程" class="headerlink" title="现在的写作流程"></a>现在的写作流程</h2><p><strong>在电脑上：</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> /d I:\my-blog</span><br><span class="line">git add -A</span><br><span class="line">git commit -m <span class="string">&quot;写完一篇&quot;</span></span><br><span class="line">git push</span><br></pre></td></tr></table></figure>
+
+<p><strong>在手机上：</strong></p>
+<p>打开 Pages CMS 网页，点「新建」写完保存。</p>
+<p>两条路都一样 —— 提交后 GitHub 自动构建、自动发布，<strong>一到两分钟后网站就更新了</strong>，完全不用管。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>改造完之后回头看，最值得的一条经验是：<strong>自动发布是基础，其他两个都建立在它之上</strong>。</p>
+<p>没有自动发布，网页后台只是个”远程改文件的工具”，改完还得回电脑发布，意义不大。有了它，写作才真正脱离了对某台电脑的依赖。</p>
+<p>另外，选工具的时候**优先看”要不要额外维护服务”**。Decap CMS 功能更全，但要自己搭 OAuth 代理；Pages CMS 简单，因为它把复杂度放在了”用 GitHub 仓库当数据库”这个设计上。对个人博客来说，少一个要维护的东西，比多几个功能重要得多。</p>
+<hr>
+<p><strong>相关文章</strong>：<a href="/2026/10/01/build-blog-with-deepseek/">用 DeepSeek 从零搭建这个博客</a> · <a href="/2026/10/01/hexo-publish-playbook/">Hexo 博客发布手册</a></p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>建站</tag>
+        <tag>自动化</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记录一下我的博客主页搭建成功</title>
+    <url>/2026/10/02/blog-homepage-rebuilt-with-ai/</url>
+    <content><![CDATA[<p>之前也搭建过个人博客，不过那会是自己买了云服务器，然后用WordPress进行建站的，</p>
+<p>WordPress优点是比较直观，主题也多随便更换，缺点是占内存比较多，优化不好的网站可能打开比较慢</p>
+<p>服务器三年到期后就没有续费了，因为都是自己玩玩，写文章也不多，感觉纯属浪费。。。</p>
+<span id="more"></span>
+
+<p>这次AI这么火，我琢磨着诶，用AI帮我搞定博客的问题可不可以，结果花了一点点时间就给我布置好了</p>
+<p><img src="https://pic1.imgdb.cn/i/034YSC4cmCpOWaWD2R6Sy5.png" alt="AI辅助"></p>
+<p>亲测DeepSeek比豆包聪明多了，一开始看豆包给了30天试用就用豆包试试了。豆包部署后用命令行出错，截图给豆包看要分析半天不出结果</p>
+<p>换了DS后一会就给我把问题给揪出来并修复好了。</p>
+<p>又可以开开心心的写文章了</p>
+<p>这次部署到GitHub上的，也不需要续费服务器了，写一个简简单单的个人博客够用了！！</p>
+]]></content>
+      <categories>
+        <category>生活</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
+        <tag>AI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>用 DeepSeek 从零搭建这个博客：完整教程</title>
+    <url>/2026/10/01/build-blog-with-deepseek/</url>
+    <content><![CDATA[<p>这个博客从一行配置到正式上线，全程有 DeepSeek 参与。这篇把完整流程、真实命令、以及我实际踩过的坑都记下来，给同样想搭站的朋友一份可以直接照做的参考。</p>
+<span id="more"></span>
+
+<h2 id="为什么用-AI-辅助建站"><a href="#为什么用-AI-辅助建站" class="headerlink" title="为什么用 AI 辅助建站"></a>为什么用 AI 辅助建站</h2><p>搭建一个静态博客，技术上并不难，难的是<strong>信息太碎</strong>。</p>
+<p>Hexo 的配置项散在官方文档各处，主题的目录结构各家不同，部署到 GitHub Pages 又要处理仓库命名、分支、代理、凭据一堆细节。对不熟悉前端工具链的人来说，真正的门槛不是”不会写代码”，而是<strong>不知道该查什么</strong>——报错信息往往是 <code>ENOENT</code> 或超时，看不出下一步该干什么。</p>
+<p>DeepSeek 在这里的价值很具体：</p>
+<ul>
+<li><strong>把模糊需求翻成可执行命令</strong>。”我想搞个博客”→ 该装什么、装哪个版本、配置文件放哪、字段怎么写</li>
+<li><strong>翻译报错</strong>。把一屏看不懂的输出丢过去，能直接告诉我卡在哪一环</li>
+<li><strong>充当检查清单</strong>。每一步做完让它核对一遍，比自己对文档快很多</li>
+</ul>
+<p>但要说明的是：<strong>AI 不是万能的</strong>。本次搭建中有两个坑，AI 一开始没预料到，是靠实际执行才暴露出来的（见下面「我踩过的四个坑」）。所以正确的用法是 <strong>AI 给方案、你负责验证</strong>，而不是无脑复制粘贴。</p>
+<h2 id="整体路线"><a href="#整体路线" class="headerlink" title="整体路线"></a>整体路线</h2><p>选定的是 <strong>Hexo + GitHub Pages</strong> 这套组合，理由很实际：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hexo + GitHub Pages</td>
+<td>纯静态、加载快、免费、仓库即备份</td>
+<td>需要本地环境</td>
+</tr>
+<tr>
+<td>WordPress</td>
+<td>后台可视化</td>
+<td>要服务器和数据库</td>
+</tr>
+<tr>
+<td>语雀 &#x2F; 知乎等平台</td>
+<td>零成本</td>
+<td>数据不在自己手里，样式受限</td>
+</tr>
+</tbody></table>
+<p>写文章只需要 Markdown，内容以纯文本存在自己电脑上，发布就是一次 <code>git push</code>。对个人博客来说足够了。</p>
+<p>整体分六步：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">环境准备 → 初始化项目 → 配置站点 → 选主题 → 写文章 → 部署上线</span><br></pre></td></tr></table></figure>
+
+<h2 id="第一步：环境准备"><a href="#第一步：环境准备" class="headerlink" title="第一步：环境准备"></a>第一步：环境准备</h2><p>需要两样东西：<strong>Node.js</strong> 和 <strong>Git</strong>。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">node -v    <span class="comment"># 查看 Node 版本</span></span><br><span class="line">git --version</span><br></pre></td></tr></table></figure>
+
+<p>Node 建议 <strong>18 以上</strong>。装完记得重启终端，否则 PATH 不生效。</p>
+<blockquote>
+<p>这一步建议让 DeepSeek 帮你确认：把 <code>node -v</code> 的输出发给它，问”这个版本能跑 Hexo 7 吗”，比自己去翻版本对照表快。</p>
+</blockquote>
+<h2 id="第二步：初始化项目"><a href="#第二步：初始化项目" class="headerlink" title="第二步：初始化项目"></a>第二步：初始化项目</h2><p>新建一个目录，初始化一个 npm 项目，然后安装 Hexo 本体和常用插件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> my-blog &amp;&amp; <span class="built_in">cd</span> my-blog</span><br><span class="line">npm init -y</span><br><span class="line"></span><br><span class="line">npm install hexo hexo-server hexo-deployer-git \</span><br><span class="line">  hexo-generator-index hexo-generator-archive \</span><br><span class="line">  hexo-generator-category hexo-generator-tag \</span><br><span class="line">  hexo-renderer-ejs hexo-renderer-marked</span><br></pre></td></tr></table></figure>
+
+<p>各包的分工：</p>
+<table>
+<thead>
+<tr>
+<th>包名</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hexo</code></td>
+<td>核心（自 Hexo 7 起已内置 <code>hexo-cli</code>，所以 <code>npx hexo</code> 直接可用）</td>
+</tr>
+<tr>
+<td><code>hexo-server</code></td>
+<td>本地预览服务器</td>
+</tr>
+<tr>
+<td><code>hexo-deployer-git</code></td>
+<td>部署到 Git 仓库</td>
+</tr>
+<tr>
+<td><code>hexo-generator-*</code></td>
+<td>生成首页 &#x2F; 归档 &#x2F; 分类 &#x2F; 标签页</td>
+</tr>
+<tr>
+<td><code>hexo-renderer-ejs</code></td>
+<td>渲染主题模板</td>
+</tr>
+<tr>
+<td><code>hexo-renderer-marked</code></td>
+<td>把 Markdown 渲染成 HTML</td>
+</tr>
+</tbody></table>
+<h2 id="第三步：配置站点"><a href="#第三步：配置站点" class="headerlink" title="第三步：配置站点"></a>第三步：配置站点</h2><p>根目录的 <code>_config.yml</code> 是主配置文件。关键是这几段：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 站点信息</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">清酒孤灯的博客</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">记录生活、技术与我的一些思考</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">清酒孤灯</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-CN</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">Asia/Shanghai</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 网址</span></span><br><span class="line"><span class="attr">url:</span> <span class="string">https://qingjiu99.github.io</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/</span></span><br><span class="line"><span class="attr">permalink:</span> <span class="string">:year/:month/:day/:title/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 分页</span></span><br><span class="line"><span class="attr">index_generator:</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">&#x27;&#x27;</span></span><br><span class="line">  <span class="attr">per_page:</span> <span class="number">10</span></span><br><span class="line">  <span class="attr">order_by:</span> <span class="string">-date</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 主题</span></span><br><span class="line"><span class="attr">theme:</span> <span class="string">aurora</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 部署</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/qingjiu99/qingjiu99.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">main</span></span><br></pre></td></tr></table></figure>
+
+<p>两个容易忽略的点：</p>
+<ul>
+<li><strong><code>timezone</code> 一定要写</strong>，否则文章日期可能因为 UTC 偏移差一天</li>
+<li><strong><code>permalink</code> 决定文章网址</strong>，<code>:title</code> 取自<strong>文件名</strong>，所以文件名会影响 URL（下面有详细说明）</li>
+</ul>
+<h2 id="第四步：选主题"><a href="#第四步：选主题" class="headerlink" title="第四步：选主题"></a>第四步：选主题</h2><p>主题放在 <code>themes/</code> 目录下，本项目用的是 <code>aurora</code>：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">themes/aurora/</span><br><span class="line">├── layout/</span><br><span class="line">│   ├── layout.ejs      # 页面骨架</span><br><span class="line">│   ├── index.ejs       # 首页（文章列表）</span><br><span class="line">│   ├── post.ejs        # 文章详情</span><br><span class="line">│   ├── page.ejs        # 独立页面</span><br><span class="line">│   ├── archive.ejs     # 归档</span><br><span class="line">│   └── _partial/       # 公共片段</span><br><span class="line">└── source/</span><br><span class="line">    └── css/style.css   # 样式</span><br></pre></td></tr></table></figure>
+
+<p>Hexo 的主题生态里，NexT、Butterfly 这些成熟主题开箱即用；想改样式就自己写一个。<strong>主题的目录约定是固定的</strong>（<code>layout/</code> 放模板、<code>source/</code> 放静态资源），理解了这一点，改任何主题都能上手。</p>
+<h2 id="第五步：写文章"><a href="#第五步：写文章" class="headerlink" title="第五步：写文章"></a>第五步：写文章</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npx hexo new <span class="string">&quot;文章标题&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这会在 <code>source/_posts/</code> 下生成一个带骨架的 Markdown 文件，格式如下：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">date: 2026-10-01 23:30:00</span><br><span class="line">tags: [随笔, 博客]</span><br><span class="line"><span class="section">categories: [生活]</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line">这里是摘要部分，会显示在首页列表里。</span><br><span class="line"></span><br><span class="line">&lt;!-- more --&gt;</span><br><span class="line"></span><br><span class="line">下面是正文，需要点&quot;阅读全文&quot;才能看到。</span><br></pre></td></tr></table></figure>
+
+<p>几个要点：</p>
+<ul>
+<li><strong><code>&lt;!-- more --&gt;</code> 是摘要分隔符</strong>。不写的话，首页会把全文铺出来</li>
+<li><strong><code>tags</code> 和 <code>categories</code> 用方括号</strong>，多个用逗号隔开</li>
+<li><strong><code>date</code> 决定排序</strong>，首页按时间倒序排</li>
+</ul>
+<h3 id="关于文件名"><a href="#关于文件名" class="headerlink" title="关于文件名"></a>关于文件名</h3><p>因为配置是 <code>new_post_name: :title.md</code>，<strong>文件名会直接变成网址的一部分</strong>。</p>
+<p>如果标题是中文，<code>npx hexo new &quot;你好，世界&quot;</code> 生成的文件名就是中文，网址会变成一串编码：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">/2026/10/01/%E4%BD%A0%E5%A5%BD%EF%BC%8C%E4%B8%96%E7%95%8C/</span><br></pre></td></tr></table></figure>
+
+<p>能用，但分享出去不好看。<strong>建议文件名用英文或拼音，标题写在 front-matter 里</strong>。</p>
+<p>写完预览一下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npx hexo server</span><br></pre></td></tr></table></figure>
+
+<p>浏览器打开 <code>http://localhost:4000</code> 检查排版，确认后 <code>Ctrl+C</code> 停掉。</p>
+<h2 id="第六步：部署到-GitHub-Pages"><a href="#第六步：部署到-GitHub-Pages" class="headerlink" title="第六步：部署到 GitHub Pages"></a>第六步：部署到 GitHub Pages</h2><h3 id="1-建仓库"><a href="#1-建仓库" class="headerlink" title="1. 建仓库"></a>1. 建仓库</h3><p>在 GitHub 上新建一个仓库，**名字必须是 <code>&lt;你的用户名&gt;.github.io</code>**（比如 <code>qingjiu99.github.io</code>）。这是 GitHub Pages 的专属命名规则，用别的名字访问地址会变成子路径。</p>
+<h3 id="2-配置部署"><a href="#2-配置部署" class="headerlink" title="2. 配置部署"></a>2. 配置部署</h3><p><code>_config.yml</code> 里填好 <code>deploy</code> 段（见第三步），然后：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npx hexo clean &amp;&amp; npx hexo generate &amp;&amp; npx hexo d</span><br></pre></td></tr></table></figure>
+
+<p>三条命令分别是<strong>清缓存 → 本地生成 → 推送部署</strong>。前两条不需要联网，可以单独跑来自查，<code>generate</code> 成功会显示 <code>N files generated</code>。</p>
+<h3 id="3-等-Pages-构建"><a href="#3-等-Pages-构建" class="headerlink" title="3. 等 Pages 构建"></a>3. 等 Pages 构建</h3><p><strong>推送成功不等于网站立刻更新。</strong> GitHub Pages 需要重新构建，通常要 1～2 分钟。刷新网站时如果还是旧内容，先等等，别急着改配置。</p>
+<h2 id="我踩过的四个坑"><a href="#我踩过的四个坑" class="headerlink" title="我踩过的四个坑"></a>我踩过的四个坑</h2><p>这部分是本文最有价值的地方——都是实际执行时才暴露出来的。</p>
+<h3 id="坑一：npx-找不到"><a href="#坑一：npx-找不到" class="headerlink" title="坑一：npx 找不到"></a>坑一：<code>npx</code> 找不到</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27;npx&#x27; 不是内部或外部命令</span><br></pre></td></tr></table></figure>
+
+<p><strong>原因</strong>：Node.js 根本没装，或者装了但没进系统 PATH。项目里即使有 <code>node_modules</code>，缺了运行时照样跑不起来。</p>
+<p><strong>排查</strong>：开个新终端敲 <code>node -v</code>。如果报错，就是环境问题，和项目无关。</p>
+<h3 id="坑二：GitHub-连不上"><a href="#坑二：GitHub-连不上" class="headerlink" title="坑二：GitHub 连不上"></a>坑二：GitHub 连不上</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Failed to connect to github.com port 443</span><br></pre></td></tr></table></figure>
+
+<p><strong>原因</strong>：国内直连 GitHub 普遍不通。<strong>注意</strong>：光开着代理软件不一定够——git 底层用的是 libcurl，不一定读取系统代理设置，需要<strong>显式给 git 设环境变量</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Windows CMD</span></span><br><span class="line"><span class="built_in">set</span> <span class="string">&quot;HTTP_PROXY=http://127.0.0.1:7897&quot;</span></span><br><span class="line"><span class="built_in">set</span> <span class="string">&quot;HTTPS_PROXY=http://127.0.0.1:7897&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># macOS / Linux</span></span><br><span class="line"><span class="built_in">export</span> HTTPS_PROXY=http://127.0.0.1:7897</span><br></pre></td></tr></table></figure>
+
+<p>端口号填你代理软件的实际端口（Clash 常见的是 7890 或 7897）。</p>
+<p>验证是否通了：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://127.0.0.1:7897 https://github.com</span><br></pre></td></tr></table></figure>
+
+<p>能返回内容就说明代理正常。</p>
+<h3 id="坑三：登录窗口关不掉"><a href="#坑三：登录窗口关不掉" class="headerlink" title="坑三：登录窗口关不掉"></a>坑三：登录窗口关不掉</h3><p>首次部署会弹出 <code>Connect to GitHub</code> 授权窗口。选 <strong>「Browser&#x2F;Device」</strong> 标签页，点 <strong>「Sign in with your browser」</strong>，浏览器里完成授权。</p>
+<p><strong>但有个坑</strong>：有时候推送其实<strong>已经成功了</strong>，这个窗口却还挂在屏幕上不消失。</p>
+<p><strong>怎么判断</strong>：去看命令行的输出。如果已经出现下面这两行，说明部署完成，窗口是残留：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">To https://github.com/qingjiu99/qingjiu99.github.io.git</span><br><span class="line"> + xxxxxxx...xxxxxxx  HEAD -&gt; main (forced update)</span><br><span class="line">INFO  Deploy done: git</span><br></pre></td></tr></table></figure>
+
+<p><strong>这时直接点右上角 ✕ 关掉就行</strong>，不要再点授权按钮，否则会触发一次多余的授权流程。</p>
+<h3 id="坑四：网站显示的是别人的内容"><a href="#坑四：网站显示的是别人的内容" class="headerlink" title="坑四：网站显示的是别人的内容"></a>坑四：网站显示的是别人的内容</h3><p>这个坑最唬人。推送成功后打开网站，<strong>标题变成了完全陌生的名字，自己的文章页全是 404</strong>。</p>
+<p><strong>原因</strong>：Pages 还在重建，浏览器拿到的是<strong>上一次部署的旧站</strong>。如果这个仓库之前放过别的内容（比如从模板 fork 来的），你会看到那个模板的内容。</p>
+<p><strong>解决</strong>：<strong>等 1～2 分钟</strong>再刷新。如果超过 5 分钟还是旧内容，再去仓库 Settings → Pages 检查构建状态。</p>
+<h2 id="和-AI-协作的几点心得"><a href="#和-AI-协作的几点心得" class="headerlink" title="和 AI 协作的几点心得"></a>和 AI 协作的几点心得</h2><p>搭完之后回头看，用 DeepSeek 辅助建站确实省了时间，但有几个心得值得记下来：</p>
+<ol>
+<li><strong>让它给命令，而不是给结论</strong>。问”怎么部署”，不如问”我要把本地 Hexo 推到 GitHub Pages，给我完整命令和每一步的作用”</li>
+<li><strong>报错原样贴给它</strong>。不要自己概括成”部署失败了”，完整的报错信息里往往藏着关键线索</li>
+<li><strong>每一步都验证</strong>。AI 给的方案可能基于旧版本，或者漏掉你这个环境的特殊情况（比如本次的”Node 没装”）</li>
+<li><strong>让它解释为什么</strong>。知道”为什么这么配”比知道”这么配”更重要，出问题时才有排查方向</li>
+</ol>
+<p>最后一点体会：<strong>AI 能帮你把博客搭起来，但写不出你的文章。</strong> 工具解决的是”能不能写”，真正难的是”写什么”。</p>
+<h2 id="常用命令速查"><a href="#常用命令速查" class="headerlink" title="常用命令速查"></a>常用命令速查</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+<th>需要联网？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npx hexo new &quot;标题&quot;</code></td>
+<td>新建文章</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo generate</code>（<code>g</code>）</td>
+<td>本地生成静态文件</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo server</code>（<code>s</code>）</td>
+<td>本地预览 <code>localhost:4000</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo clean</code></td>
+<td>清理缓存和 <code>public/</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo deploy</code>（<code>d</code>）</td>
+<td>部署到远端</td>
+<td><strong>是</strong></td>
+</tr>
+</tbody></table>
+<p>完整发布流程：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npx hexo clean &amp;&amp; npx hexo generate &amp;&amp; npx hexo d</span><br></pre></td></tr></table></figure>
+
+<p>搭建博客最难的不是技术，而是开始写。祝大家都能拥有自己的小天地。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>建站</tag>
+        <tag>AI</tag>
+        <tag>DeepSeek</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>为什么随机封面还是会重复：Butterfly 主题的去重机制分析</title>
+    <url>/2026/10/08/butterfly-random-cover-api/</url>
+    <content><![CDATA[<p>给 Hexo 博客配置随机图片 API 后，我发现不同文章的封面并不是永远不重复：有时连续几篇文章会出现相同或相似的图片。进一步查看 Butterfly 主题的实现后，才发现这里的“随机”与“唯一”是两回事。</p>
+<span id="more"></span>
+
+<h2 id="当前配置了多少个-API"><a href="#当前配置了多少个-API" class="headerlink" title="当前配置了多少个 API"></a>当前配置了多少个 API</h2><p>现在使用的是 <a href="https://uapis.cn/docs/api-reference/get-random-image">UapiPro 随机图片接口</a>，通过 <code>category</code> 参数选择不同类别：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">cover:</span></span><br><span class="line">  <span class="attr">default_cover:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;https://uapis.cn/api/v1/random/image?category=acg&amp;type=mb&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;https://uapis.cn/api/v1/random/image?category=acg&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;https://uapis.cn/api/v1/random/image?category=anime&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;https://uapis.cn/api/v1/random/image?category=landscape&amp;type=mb&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;https://uapis.cn/api/v1/random/image?category=landscape&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;https://uapis.cn/api/v1/random/image?category=furry&quot;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&quot;https://uapis.cn/api/v1/random/image&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>列表里一共 7 个候选地址，覆盖 <code>acg</code>（二次元动漫）、<code>anime</code>、<code>landscape</code>（风景）、<code>furry</code> 等类别，最后一项不指定 <code>category</code>，走全局随机。</p>
+<p>其中 <code>type=mb</code> 是移动端尺寸。该接口支持 <code>type</code> 子类别，<code>mb</code> 返回的图片明显更小，实测约为 200 KB，而不带 <code>type</code> 的同一类别可能达到 1 MB 以上，对手机访问更友好。</p>
+<p>这些地址在配置时都实际返回了图片响应。需要注意的是，接口文档中列出的其他类别（例如 <code>ai_drawing</code>、<code>ikun</code>）在本次测试时返回 404，因此没有加入配置。第三方 API 的可用性会变化，后续如果某个地址失效，需要替换或删除。</p>
+<h2 id="一次封面变成-404-插图的排查"><a href="#一次封面变成-404-插图的排查" class="headerlink" title="一次封面变成 404 插图的排查"></a>一次封面变成 404 插图的排查</h2><p>配置完成后，首页出现过一张明显的 “404 ERROR” 插图。这里记录一下排查过程，因为它很容易被误判成接口挂了或者博客部署出错。</p>
+<h3 id="404-插图其实来自主题"><a href="#404-插图其实来自主题" class="headerlink" title="404 插图其实来自主题"></a>404 插图其实来自主题</h3><p>Butterfly 的文章封面是这样渲染的：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;post-bg&quot;</span> <span class="attr">src</span>=<span class="string">&quot;...&quot;</span> <span class="attr">onerror</span>=<span class="string">&quot;this.onerror=null;this.src=&#x27;/img/404.jpg&#x27;&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>也就是说，只要封面图片<strong>加载失败</strong>，不管是接口返回错误、连接超时还是跳转目标不可达，浏览器都会用主题自带的 <code>/img/404.jpg</code> 顶上去。所以看到这张插图，只代表”这张图没加载出来”，不一定是接口真的返回了 HTTP 404。</p>
+<h3 id="定位到具体类别"><a href="#定位到具体类别" class="headerlink" title="定位到具体类别"></a>定位到具体类别</h3><p>逐个类别做多次请求统计后，问题范围很快缩小了：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>8 次请求成功率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>acg</code></td>
+<td>8&#x2F;8</td>
+</tr>
+<tr>
+<td><code>acg&amp;type=mb</code></td>
+<td>8&#x2F;8</td>
+</tr>
+<tr>
+<td><code>acg&amp;type=pc</code></td>
+<td>8&#x2F;8</td>
+</tr>
+<tr>
+<td><code>anime</code></td>
+<td>8&#x2F;8</td>
+</tr>
+<tr>
+<td><code>furry</code></td>
+<td>8&#x2F;8</td>
+</tr>
+<tr>
+<td><code>landscape</code></td>
+<td>8&#x2F;8</td>
+</tr>
+<tr>
+<td><code>landscape&amp;type=mb</code></td>
+<td>8&#x2F;8</td>
+</tr>
+<tr>
+<td><code>general_anime&amp;type=mb</code></td>
+<td>4&#x2F;8</td>
+</tr>
+</tbody></table>
+<p>只有 <code>general_anime&amp;type=mb</code> 会不稳定地失败。</p>
+<h3 id="为什么它不稳定"><a href="#为什么它不稳定" class="headerlink" title="为什么它不稳定"></a>为什么它不稳定</h3><p>跟踪跳转地址后发现，<code>general_anime</code> 并不是由 uapis 自己托管图片的类别，而是聚合类：每次请求都会 302 跳到一个<strong>随机第三方图床</strong>。</p>
+<p>同一个类别，连续几次请求可能落到完全不同的上游：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">https://p0.qhimg.com/bdr/__85/t01642c788ea60ce064.jpg        → 正常</span><br><span class="line">https://api.img.mtyqx.cn/api/large/0072Vf1pgy1foxli524aoj...  → 正常</span><br><span class="line">https://api.r10086.com/樱道随机图片api接口.php?token=...        → 正常</span><br><span class="line">https://api.lolimi.cn/API/dmt/api.php?type=image             → 连接失败</span><br></pre></td></tr></table></figure>
+
+<p>只要这次抽到的上游不可用，封面就加载失败，于是显示 404 插图。也就是说，失败不是配置文件写错了，而是<strong>上游图床的可用性完全不受我们控制</strong>。</p>
+<p>相比之下，<code>acg</code>、<code>anime</code>、<code>furry</code> 这些类别最终都指向 uapis 自己的资源：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">https://uapis.cn/assets/acg/pc/0072Vf1pgy1foxki7zn13j31kw0w07uc.jpg</span><br></pre></td></tr></table></figure>
+
+<p>同源、可控，因此稳定得多。</p>
+<h3 id="处理方式"><a href="#处理方式" class="headerlink" title="处理方式"></a>处理方式</h3><p>最终选择最直接的方案：把 <code>general_anime&amp;type=mb</code> 从候选列表里删掉，保留其余 7 个稳定类别。</p>
+<p>如果确实需要这类聚合图片，也可以保留它，但要接受偶发的兜底插图；更稳妥的做法是把它换成静态图片，或者在文章 front matter 里为重要文章单独指定本地封面。</p>
+<h2 id="Butterfly-如何避免重复"><a href="#Butterfly-如何避免重复" class="headerlink" title="Butterfly 如何避免重复"></a>Butterfly 如何避免重复</h2><p>Butterfly 的随机封面逻辑大致可以抽象成下面的代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> history = []</span><br><span class="line"><span class="keyword">const</span> maxHistory = <span class="title class_">Math</span>.<span class="title function_">min</span>(<span class="number">3</span>, coverCount - <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">  <span class="keyword">let</span> index</span><br><span class="line"></span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">    index = <span class="title class_">Math</span>.<span class="title function_">floor</span>(<span class="title class_">Math</span>.<span class="title function_">random</span>() * coverCount)</span><br><span class="line">  &#125; <span class="keyword">while</span> (history.<span class="title function_">includes</span>(index))</span><br><span class="line"></span><br><span class="line">  history.<span class="title function_">push</span>(index)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (history.<span class="property">length</span> &gt; maxHistory) &#123;</span><br><span class="line">    history.<span class="title function_">shift</span>()</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">yield</span> defaultCover[index]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段逻辑的重点是 <code>maxHistory</code>。当候选封面超过 3 个时，主题只会记住最近 3 次使用过的索引。</p>
+<p>也就是说，它的目标是：</p>
+<blockquote>
+<p>尽量避免最近几篇文章使用相同封面，而不是保证整批文章全部使用不同封面。</p>
+</blockquote>
+<p>假设有 3 个候选 URL，前几次选择可能是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">文章 1 → dmoe</span><br><span class="line">文章 2 → paugram</span><br><span class="line">文章 3 → mtyqx</span><br><span class="line">文章 4 → dmoe</span><br></pre></td></tr></table></figure>
+
+<p>第 4 篇重新使用 <code>cover=2</code> 是允许的，因为它已经不在“最近 3 次”的历史记录中。</p>
+<p>因此，观察到大约每三篇或几篇文章出现重复，并不一定是配置失效，而是主题默认的有限记忆策略造成的。</p>
+<h2 id="为什么-API-参数不能保证图片唯一"><a href="#为什么-API-参数不能保证图片唯一" class="headerlink" title="为什么 API 参数不能保证图片唯一"></a>为什么 API 参数不能保证图片唯一</h2><p>即使文章引用的是不同类别的 URL：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">https://uapis.cn/api/v1/random/image?category=acg</span><br><span class="line">https://uapis.cn/api/v1/random/image?category=landscape</span><br><span class="line">https://uapis.cn/api/v1/random/image?category=anime</span><br></pre></td></tr></table></figure>
+
+<p>服务端仍可能返回相同或相似图片，原因包括：</p>
+<ul>
+<li>查询参数没有被服务端用作图库分区。</li>
+<li>API 使用自己的随机数生成器，可能重复抽到同一张图。</li>
+<li>CDN 或浏览器缓存了重定向结果。</li>
+<li>API 返回的是临时跳转地址，最终图片地址可能相同。</li>
+<li>图片库本身数量有限。</li>
+</ul>
+<p>所以“URL 不同”不等于“图片内容不同”。</p>
+<h2 id="构建时随机与访问时随机"><a href="#构建时随机与访问时随机" class="headerlink" title="构建时随机与访问时随机"></a>构建时随机与访问时随机</h2><p>Butterfly 的默认封面是在 Hexo 构建过程中分配的。构建时，主题会给每篇文章写入一个封面 URL；推送到 GitHub Pages 后，静态 HTML 已经生成。</p>
+<p>但是，如果这个 URL 本身是随机 API：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;https://uapis.cn/api/v1/random/image?category=landscape&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>那么同一篇文章每次被浏览时，API 都可能返回不同图片。也就是说：</p>
+<ul>
+<li>文章之间的 API 地址可能不同。</li>
+<li>同一篇文章刷新页面后，实际图片也可能变化。</li>
+<li>重新构建博客时，文章分配到的 API 地址还可能再次变化。</li>
+</ul>
+<p>这也是“构建时随机选择”和“请求时随机返回”叠加后的结果。</p>
+<h2 id="如果需要真正避免重复"><a href="#如果需要真正避免重复" class="headerlink" title="如果需要真正避免重复"></a>如果需要真正避免重复</h2><h3 id="方案一：使用多张本地图片"><a href="#方案一：使用多张本地图片" class="headerlink" title="方案一：使用多张本地图片"></a>方案一：使用多张本地图片</h3><p>这是最稳定的方案。准备多张本地图片：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">source/img/covers/cover-01.jpg</span><br><span class="line">source/img/covers/cover-02.jpg</span><br><span class="line">source/img/covers/cover-03.jpg</span><br><span class="line">source/img/covers/cover-04.jpg</span><br></pre></td></tr></table></figure>
+
+<p>然后配置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">cover:</span></span><br><span class="line">  <span class="attr">default_cover:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/img/covers/cover-01.jpg</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/img/covers/cover-02.jpg</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/img/covers/cover-03.jpg</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/img/covers/cover-04.jpg</span></span><br></pre></td></tr></table></figure>
+
+<p>这样可以避免第三方 API 不稳定、失效或返回重复图片。不过 Butterfly 默认仍然只保证有限范围内避重；如果文章数量超过图片数量，后续仍会循环使用。</p>
+<h3 id="方案二：改成整批图片不重复"><a href="#方案二：改成整批图片不重复" class="headerlink" title="方案二：改成整批图片不重复"></a>方案二：改成整批图片不重复</h3><p>如果希望一次构建中每篇文章都使用不同图片，就需要修改主题的随机逻辑：</p>
+<ol>
+<li>构建开始时建立候选图片索引。</li>
+<li>随机打乱整个索引数组。</li>
+<li>按文章顺序依次取出图片。</li>
+<li>候选图片用完后再重新开始一轮。</li>
+</ol>
+<p>这种方式可以保证在图片池用完前不重复，但需要维护主题源码或写 Hexo 插件，升级 Butterfly 时也要重新检查兼容性。</p>
+<h3 id="方案三：文章-front-matter-固定封面"><a href="#方案三：文章-front-matter-固定封面" class="headerlink" title="方案三：文章 front matter 固定封面"></a>方案三：文章 front matter 固定封面</h3><p>对重要文章，可以直接在文章头部指定：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">cover:</span> <span class="string">/img/covers/jev.jpg</span></span><br></pre></td></tr></table></figure>
+
+<p>这样该文章不会再使用默认随机封面，适合专题文章、置顶文章或希望长期保持固定视觉的内容。</p>
+<h2 id="顺手做的两项性能优化"><a href="#顺手做的两项性能优化" class="headerlink" title="顺手做的两项性能优化"></a>顺手做的两项性能优化</h2><p>随机图片接口虽然方便，但它是首页最重的资源。实测时，单个接口响应时间大多在 0.5 到 2 秒之间，图片大小从几百 KB 到 1.6 MB 不等。首页如果一次加载十几张远程封面，流量和等待时间都会明显上升。</p>
+<p>因此这次同时调整了两个地方。</p>
+<p>第一，开启图片懒加载：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">lazyload:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">native:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>Butterfly 会为页面中的图片加上原生懒加载属性：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;post-bg&quot;</span> <span class="attr">src</span>=<span class="string">&quot;...&quot;</span> <span class="attr">loading</span>=<span class="string">&#x27;lazy&#x27;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>浏览器因此会优先加载首屏附近的图片，下方文章封面等接近可视区域时再请求。</p>
+<p>第二，减少首页文章数量：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">index_generator:</span></span><br><span class="line">  <span class="attr">per_page:</span> <span class="number">6</span></span><br><span class="line">  <span class="attr">order_by:</span> <span class="string">-date</span></span><br></pre></td></tr></table></figure>
+
+<p>首页卡片数量减少后，首屏需要请求的远程封面也相应变少，移动网络下的体感会更明显。</p>
+<p>需要说明的是，懒加载解决的是“什么时候请求”，不能减少单张图片的体积。如果封面本身有 1 MB 以上，滚动到该位置时依然要等待。所以要继续提速，仍然需要控制图片大小，例如优先使用 <code>type=mb</code> 这类小尺寸，或改用压缩后的本地图片。</p>
+<h2 id="我的选择"><a href="#我的选择" class="headerlink" title="我的选择"></a>我的选择</h2><p>目前博客使用同一个随机图片服务的 8 个不同类别候选地址，配合懒加载和首页 6 篇文章。这样既有视觉变化，又不会像之前那样让首页一次拉取大量远程大图。</p>
+<p>本文中的接口来源与参考资料：</p>
+<ul>
+<li><a href="https://uapis.cn/docs/api-reference/get-random-image">UapiPro 随机图片接口文档</a></li>
+<li><a href="https://blog.csdn.net/SectSnow/article/details/115835711">十五个免费随机图片 API 接口网站（CSDN）</a></li>
+</ul>
+<p>如果希望长期稳定、可控并且便于缓存，建议逐步换成本地图片，并为重要文章显式指定 <code>cover</code>。</p>
+<p>随机带来变化，固定带来可控；在静态博客里，后者通常更适合正式内容。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>Butterfly</tag>
+        <tag>随机封面</tag>
+        <tag>前端</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>你好，世界</title>
+    <url>/2026/10/01/hello-world/</url>
+    <content><![CDATA[<p>欢迎来到我的个人博客！这里是第一篇文章，用来测试 Markdown 渲染效果。</p>
+<span id="more"></span>
+
+<h2 id="关于这个博客"><a href="#关于这个博客" class="headerlink" title="关于这个博客"></a>关于这个博客</h2><p>这个站点使用 <a href="https://hexo.io/">Hexo</a> 搭建，是一个纯静态的个人博客。它加载快、部署简单，写文章只需要 Markdown。</p>
+<h2 id="Markdown-都能写些什么"><a href="#Markdown-都能写些什么" class="headerlink" title="Markdown 都能写些什么"></a>Markdown 都能写些什么</h2><p><strong>加粗</strong>、<em>斜体</em>、<del>删除线</del>，以及 <code>行内代码</code>：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 一段示例代码</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">sayHello</span>(<span class="params">name</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`Hello, <span class="subst">$&#123;name&#125;</span>!`</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">sayHello</span>(<span class="string">&#x27;世界&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>引用块：好的内容值得被慢慢写出来。</p>
+</blockquote>
+<ul>
+<li>无序列表第一项</li>
+<li>无序列表第二项</li>
+</ul>
+<ol>
+<li>有序列表第一项</li>
+<li>有序列表第二项</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文章</td>
+<td>支持分类、标签、分页</td>
+</tr>
+<tr>
+<td>归档</td>
+<td>按年份归档展示</td>
+</tr>
+<tr>
+<td>部署</td>
+<td>可一键部署到 GitHub Pages 等</td>
+</tr>
+</tbody></table>
+<p>以后我会在这里记录技术笔记、生活随笔和一些碎碎念，欢迎常来看看。</p>
+]]></content>
+      <categories>
+        <category>生活</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
+        <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>我的 Hexo 博客换上 Butterfly 主题</title>
+    <url>/2026/10/07/hexo-butterfly-theme-migration/</url>
+    <content><![CDATA[<p>这次给个人博客换了一个更有表现力的主题：Butterfly。相比之前的自研 Aurora 主题，Butterfly 提供了更完整的卡片式首页、侧栏组件、深色模式、目录、搜索和文章阅读体验。</p>
+<span id="more"></span>
+
+<h2 id="为什么选择-Butterfly"><a href="#为什么选择-Butterfly" class="headerlink" title="为什么选择 Butterfly"></a>为什么选择 Butterfly</h2><p>个人博客不只是文章的容器，首页、导航、归档和文章详情页也会影响阅读体验。Butterfly 的视觉设计比较丰富，同时保留了 Hexo 静态生成的优点：构建简单、访问速度快、部署成本低。</p>
+<p>这次迁移主要看中了几个功能：</p>
+<ul>
+<li>卡片式首页和侧栏信息卡片。</li>
+<li>文章目录、阅读进度和代码块工具栏。</li>
+<li>内置深色模式和移动端适配。</li>
+<li>分类、标签、归档等页面的统一设计。</li>
+<li>本地搜索和文章字数、阅读时间统计。</li>
+</ul>
+<h2 id="这次改了什么"><a href="#这次改了什么" class="headerlink" title="这次改了什么"></a>这次改了什么</h2><p>博客仍然使用 Hexo 7.3，文章源文件和永久链接都没有改变，只替换了主题层：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Hexo 站点配置</span><br><span class="line">      ↓</span><br><span class="line">Butterfly 主题配置</span><br><span class="line">      ↓</span><br><span class="line">Pug / Stylus 渲染器</span><br><span class="line">      ↓</span><br><span class="line">静态 HTML、CSS 和 JavaScript</span><br></pre></td></tr></table></figure>
+
+<p>项目中新增了 <code>themes/butterfly</code> 主题目录，并安装了 <code>hexo-renderer-pug</code> 与 <code>hexo-renderer-stylus</code>。Butterfly 的站点配置单独放在根目录的 <code>_config.butterfly.yml</code>，这样以后升级主题时，个人配置不会和主题默认配置混在一起。</p>
+<h2 id="首页与导航"><a href="#首页与导航" class="headerlink" title="首页与导航"></a>首页与导航</h2><p>现在首页采用 Butterfly 的文章卡片布局，文章摘要会根据正文自动生成。导航栏增加了：首页、归档、分类、标签和关于页面；侧栏则展示作者介绍、最近文章、分类、标签和归档。</p>
+<p>博客的文章链接格式仍然是：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">/:year/:month/:day/:title/</span><br></pre></td></tr></table></figure>
+
+<p>因此已有文章不需要修改链接，之前发布的内容仍然可以正常访问。</p>
+<h2 id="如何本地预览"><a href="#如何本地预览" class="headerlink" title="如何本地预览"></a>如何本地预览</h2><p>修改主题配置后，可以执行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npx hexo clean</span><br><span class="line">npx hexo generate</span><br><span class="line">npx hexo server</span><br></pre></td></tr></table></figure>
+
+<p>然后打开 <code>http://localhost:4000</code>。如果只想检查构建是否成功，执行 <code>npx hexo generate</code> 即可。</p>
+<h2 id="部署方式没有改变"><a href="#部署方式没有改变" class="headerlink" title="部署方式没有改变"></a>部署方式没有改变</h2><p>博客仍然通过 GitHub Actions 自动部署：推送源码到 <code>main</code> 分支后，工作流会安装依赖、执行 Hexo 构建，再把 <code>public</code> 目录发布到 GitHub Pages 仓库。</p>
+<p>主题切换并不需要改变域名或部署平台，这也是静态博客的一大好处：内容、主题和托管平台之间相对独立。</p>
+<h2 id="迁移时需要注意什么"><a href="#迁移时需要注意什么" class="headerlink" title="迁移时需要注意什么"></a>迁移时需要注意什么</h2><p>主题切换并不只是修改一个 <code>theme</code> 字段，还需要确保构建环境拥有主题和对应渲染器。尤其是自动部署时，主题目录必须进入源码仓库，否则本地可以生成，GitHub Actions 却会因为找不到主题而失败。</p>
+<p>另外，Butterfly 的默认配置功能很多，不建议一开始全部打开。更稳妥的做法是先启用导航、目录、深色模式、搜索和统计等常用功能，再根据访问情况逐步调整。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这次迁移保留了原有文章和 URL，只更换了展示层。Butterfly 让博客首页和文章页更完整，也为后续增加评论、友链、搜索和更多互动功能留下了空间。</p>
+<p>对个人 Hexo 博客来说，主题不需要追求最复杂，关键是让内容更容易被发现、更舒服地阅读。接下来会继续根据实际使用体验，调整配色、封面和侧栏内容。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>建站</tag>
+        <tag>Butterfly</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>给博客加一个迷你音乐播放器</title>
+    <url>/2026/10/09/hexo-mini-music-player/</url>
+    <content><![CDATA[<p>一直想给博客角落放个音乐播放器：平时不占地方，想听点一下，歌单也能翻。参考了 Aciano 的《Hexo：为博客插入音乐》，用 APlayer + Meting 把网易云歌单接进来，又把默认那个方块样式改成了左下角的圆唱片。</p>
+<span id="more"></span>
+
+<h2 id="长什么样"><a href="#长什么样" class="headerlink" title="长什么样"></a>长什么样</h2><p>平常它只是左下角一枚唱片，暂停时中间显示播放键，播放时唱片缓慢旋转、把鼠标移开就只剩封面：</p>
+<p><img src="/img/music-player-mini.png" alt="迷你唱片"></p>
+<p>点唱片右侧的小箭头，展开成一张卡片，可以看歌名、拖进度、切歌；再点歌单图标就弹出完整歌单，当前播放的那首会高亮并自动滚到可见位置：</p>
+<p><img src="/img/music-player-card.png" alt="展开后的卡片"></p>
+<p><img src="/img/music-player-playlist.png" alt="歌单面板"></p>
+<h2 id="为什么是-APlayer-Meting"><a href="#为什么是-APlayer-Meting" class="headerlink" title="为什么是 APlayer + Meting"></a>为什么是 APlayer + Meting</h2><p>试过两条路，都不合适：</p>
+<ul>
+<li><strong>网易云官方的外链播放器</strong>：样式写死改不动，而且有版权的歌直接不给生成外链，等于歌单选不了。</li>
+<li><strong><code>hexo-tag-aplayer</code> 插件</strong>：它的思路是往主题里注入播放器，但 Butterfly 5.7 已经移除了 <code>aplayerInject</code> 配置项，用它反而要去改主题源码，升级主题时又会冲突。</li>
+</ul>
+<p>最后选的是 <strong>APlayer（播放器本体）+ Meting 接口（把歌单 ID 换成音频直链）</strong>，通过主题的 <code>inject</code> 注入，一行主题代码都不用改：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">网易云歌单 ID</span><br><span class="line">      ↓</span><br><span class="line">Meting 接口 → 歌单里每首歌的 标题 / 歌手 / 音频直链 / 封面</span><br><span class="line">      ↓</span><br><span class="line">APlayer → 渲染播放器（迷你 + 吸底）</span><br><span class="line">      ↓</span><br><span class="line">Butterfly inject → 每个页面底部都有一份</span><br></pre></td></tr></table></figure>
+
+<h2 id="接入：5-行配置-2-个文件"><a href="#接入：5-行配置-2-个文件" class="headerlink" title="接入：5 行配置 + 2 个文件"></a>接入：5 行配置 + 2 个文件</h2><h3 id="1-在-config-butterfly-yml-里注入资源"><a href="#1-在-config-butterfly-yml-里注入资源" class="headerlink" title="1. 在 _config.butterfly.yml 里注入资源"></a>1. 在 <code>_config.butterfly.yml</code> 里注入资源</h3><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">inject:</span></span><br><span class="line">  <span class="attr">head:</span></span><br><span class="line">    <span class="comment"># --heo-main 顺便当作播放器主色</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&lt;style&gt;:root&#123;--heo-main:#4f6ef7;&#125;&lt;/style&gt;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&#x27;&lt;link rel=&quot;stylesheet&quot; href=&quot;/vendor/aplayer/APlayer.min.css&quot;&gt;&#x27;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&#x27;&lt;link rel=&quot;stylesheet&quot; href=&quot;/css/music-player.css&quot;&gt;&#x27;</span></span><br><span class="line">  <span class="attr">bottom:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&#x27;&lt;script src=&quot;/vendor/aplayer/APlayer.min.js&quot;&gt;&lt;/script&gt;&#x27;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">&#x27;&lt;script src=&quot;/js/music-player.js&quot;&gt;&lt;/script&gt;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>APlayer 我没有走 CDN，而是把 <code>aplayer@1.10.1/dist</code> 下的 <code>APlayer.min.css</code> 和 <code>APlayer.min.js</code> 放进了 <code>source/vendor/aplayer/</code>。理由很实际：博客在国内访问，CDN 偶尔抽风就会整个播放器都不出现，本地化之后只有「歌单数据」还依赖网络。</p>
+<p><code>inject</code> 里的内容会原样插到 <code>&lt;/head&gt;</code> 前和 <code>&lt;/body&gt;</code> 前，所以 CSS 放 head、JS 放 bottom。注意 YAML 里这些字符串我用单引号包起来了，因为里面同时有 <code>&quot;</code> 和 <code>:</code>。</p>
+<h3 id="2-样式-source-css-music-player-css"><a href="#2-样式-source-css-music-player-css" class="headerlink" title="2. 样式 source/css/music-player.css"></a>2. 样式 <code>source/css/music-player.css</code></h3><p>核心就三件事：把唱片变圆、让它转、展开时变成卡片。</p>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* 圆形唱片 + 一圈白色描边和阴影 */</span></span><br><span class="line"><span class="selector-class">.aplayer</span><span class="selector-class">.aplayer-fixed</span><span class="selector-class">.mini-music</span><span class="selector-class">.aplayer-narrow</span> <span class="selector-class">.aplayer-pic</span> &#123;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">62px</span>;</span><br><span class="line">  <span class="attribute">height</span>: <span class="number">62px</span>;</span><br><span class="line">  <span class="attribute">border-radius</span>: <span class="number">50%</span>;</span><br><span class="line">  <span class="attribute">background-size</span>: cover;</span><br><span class="line">  <span class="attribute">box-shadow</span>: <span class="number">0</span> <span class="number">0</span> <span class="number">0</span> <span class="number">3px</span> <span class="built_in">var</span>(--card-bg, <span class="number">#fff</span>), <span class="number">0</span> <span class="number">8px</span> <span class="number">22px</span> <span class="built_in">rgba</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, .<span class="number">28</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 播放时才转（JS 会把播放状态写到容器的 data-playing 上） */</span></span><br><span class="line"><span class="keyword">@keyframes</span> mini-music-rotate &#123;</span><br><span class="line">  <span class="selector-tag">from</span> &#123; <span class="attribute">transform</span>: <span class="built_in">rotate</span>(<span class="number">0deg</span>); &#125;</span><br><span class="line">  <span class="selector-tag">to</span>   &#123; <span class="attribute">transform</span>: <span class="built_in">rotate</span>(<span class="number">360deg</span>); &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-class">.aplayer</span><span class="selector-class">.aplayer-fixed</span><span class="selector-class">.mini-music</span><span class="selector-attr">[data-playing=<span class="string">&#x27;1&#x27;</span>]</span><span class="selector-class">.aplayer-narrow</span> <span class="selector-class">.aplayer-pic</span> &#123;</span><br><span class="line">  <span class="attribute">animation</span>: mini-music-rotate <span class="number">16s</span> linear infinite;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 播放/暂停按钮反向旋转，否则图标会跟着歪 */</span></span><br><span class="line"><span class="selector-class">.aplayer</span><span class="selector-class">.aplayer-fixed</span><span class="selector-class">.mini-music</span><span class="selector-attr">[data-playing=<span class="string">&#x27;1&#x27;</span>]</span><span class="selector-class">.aplayer-narrow</span> <span class="selector-class">.aplayer-pic</span> <span class="selector-class">.aplayer-button</span> &#123;</span><br><span class="line">  <span class="attribute">animation</span>: mini-music-rotate <span class="number">16s</span> linear infinite reverse;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>颜色不写死，用 <code>var(--btn-bg)</code> &#x2F; <code>var(--card-bg)</code> 这些主题变量，这样深色模式会自动跟着变。</p>
+<h3 id="3-初始化-source-js-music-player-js"><a href="#3-初始化-source-js-music-player-js" class="headerlink" title="3. 初始化 source/js/music-player.js"></a>3. 初始化 <code>source/js/music-player.js</code></h3><p>APlayer 只认音频数组，所以脚本要自己把歌单拉下来，再交给它：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> <span class="variable constant_">CONFIG</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="string">&#x27;17994049368&#x27;</span>,        <span class="comment">// 网易云歌单 ID</span></span><br><span class="line">  <span class="attr">server</span>: <span class="string">&#x27;netease&#x27;</span>,</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&#x27;playlist&#x27;</span>,</span><br><span class="line">  <span class="attr">apis</span>: [</span><br><span class="line">    <span class="string">&#x27;https://api.i-meto.com/meting/api?server=:server&amp;type=:type&amp;id=:id&amp;r=:r&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;https://api.injahow.cn/meting/?server=:server&amp;type=:type&amp;id=:id&#x27;</span></span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="title function_">fetch</span>(url).<span class="title function_">then</span>(<span class="function"><span class="params">res</span> =&gt;</span> res.<span class="title function_">json</span>()).<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">list</span>) &#123;</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">APlayer</span>(&#123;</span><br><span class="line">    <span class="attr">container</span>: box,          <span class="comment">// 一个挂在 body 上的空 div</span></span><br><span class="line">    <span class="attr">audio</span>: list,</span><br><span class="line">    <span class="attr">fixed</span>: <span class="literal">true</span>,             <span class="comment">// 吸底</span></span><br><span class="line">    <span class="attr">mini</span>: <span class="literal">true</span>,              <span class="comment">// 迷你形态（圆形唱片）</span></span><br><span class="line">    <span class="attr">autoplay</span>: <span class="literal">false</span>,         <span class="comment">// 浏览器会拦，别开</span></span><br><span class="line">    <span class="attr">preload</span>: <span class="string">&#x27;metadata&#x27;</span>,     <span class="comment">// 只预载元信息，省流量</span></span><br><span class="line">    <span class="attr">lrcType</span>: <span class="number">0</span>,              <span class="comment">// 不显示歌词，迷你播放器用不上</span></span><br><span class="line">    <span class="attr">loop</span>: <span class="string">&#x27;all&#x27;</span>,</span><br><span class="line">    <span class="attr">order</span>: <span class="string">&#x27;list&#x27;</span>,</span><br><span class="line">    <span class="attr">listFolded</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">listMaxHeight</span>: <span class="string">&#x27;320px&#x27;</span></span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>接口地址写了两个轮着试，整轮都失败还会歇 1.5 秒再重试一轮：Meting 是公共公益服务，偶尔会抽风，多一层兜底至少不会让播放器整个消失。</p>
+<p>没有用 MetingJS，是因为它把「拉数据」和「建播放器」绑在一起，拿不到播放器实例；自己 <code>fetch</code> 只有十几行，但实例在手，后面想干什么都方便。</p>
+<h2 id="踩到的坑"><a href="#踩到的坑" class="headerlink" title="踩到的坑"></a>踩到的坑</h2><p>这几个都是真机上试出来才发现的，记一下省得下次再踩：</p>
+<p><strong>1. 歌单面板高度不生效，200 首歌把面板撑到 6700px 高，打开还停在列表末尾。</strong><br>APlayer 会把 <code>listMaxHeight</code> 原样写进 <code>max-height</code>，所以传数字 300 就得到 <code>max-height: 300</code>——没有单位，浏览器直接丢掉这条声明。传字符串 <code>&#39;320px&#39;</code> 才对。为了双保险，CSS 里也给滚动容器定了一次高：</p>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-class">.aplayer</span><span class="selector-class">.aplayer-fixed</span><span class="selector-class">.mini-music</span> <span class="selector-class">.aplayer-list</span> <span class="selector-tag">ol</span> &#123; <span class="attribute">max-height</span>: <span class="number">320px</span> <span class="meta">!important</span>; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>给 <code>ol</code> 而不是给外层容器定高，是因为折叠靠的是外层 <code>.aplayer-list-hide &#123; max-height: 0 !important &#125;</code>，写在外层会互相打架。</p>
+<p><strong>2. 暂停按钮会跟着唱片绕圈。</strong><br>APlayer 默认把「暂停」按钮放在封面右下角（播放按钮才在正中间），封面一旋转，它就会绕着圆心跑。把两个按钮都居中就好了：</p>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line"><span class="selector-class">.aplayer-mini-music</span><span class="selector-class">.aplayer-narrow</span> <span class="selector-class">.aplayer-pic</span> <span class="selector-class">.aplayer-play</span>,</span><br><span class="line"><span class="selector-class">.aplayer-mini-music</span><span class="selector-class">.aplayer-narrow</span> <span class="selector-class">.aplayer-pic</span> <span class="selector-class">.aplayer-pause</span> &#123;</span><br><span class="line">  <span class="attribute">bottom</span>: <span class="number">50%</span>; <span class="attribute">right</span>: <span class="number">50%</span>;</span><br><span class="line">  <span class="attribute">width</span>: <span class="number">26px</span>; <span class="attribute">height</span>: <span class="number">26px</span>; <span class="attribute">margin</span>: <span class="number">0</span> -<span class="number">15px</span> -<span class="number">15px</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 不要自己挪那排「上一首 &#x2F; 播放 &#x2F; 下一首 &#x2F; 歌单」图标。</strong><br>我一开始嫌它们贴着右边缘，整排往左平移了 30px，结果撞到了歌名。后来才看清：这些图标是相对 <code>.aplayer-controller</code> 定位的，而 APlayer 已经在播放器主体右侧留了 18px 给收起箭头、并给歌名留了 105px 的宽度，三者本来就是错开的。<strong>动图标之前先算清楚它相对谁定位。</strong></p>
+<p><strong>4. 歌单里会有歌曲 404。</strong><br>比如我歌单第一首在网易云已经下架，Meting 接口返回 404，浏览器播放报错。APlayer 自己会等 2 秒跳到下一首，属于正常容错，不用管。</p>
+<p><strong>5. 自动播放基本不可能。</strong><br>浏览器的自动播放策略要求至少有一次用户交互，<code>autoplay: true</code> 只会换来一堆 <code>NotAllowedError</code>。所以我关了自动播放，并且用 <code>sessionStorage</code> 记住「在放哪首、放到第几秒」，翻页回来接着放——但恢复出来是<strong>暂停</strong>状态，点一下才出声。</p>
+<p><strong>6. 播放器的 DOM 要挂在 <code>body</code> 下面。</strong><br><code>position: fixed</code> 遇到有 <code>transform</code> 的祖先会失效（变成相对那个祖先定位）。所以我是让脚本自己 <code>document.body.appendChild()</code> 一个容器，而不是把它写进页面的某个区块里。</p>
+<h2 id="顺手加的几样"><a href="#顺手加的几样" class="headerlink" title="顺手加的几样"></a>顺手加的几样</h2><p>播放器装上之后又补了几个「安知鱼味」的东西。</p>
+<p>**音乐馆页面 <code>/music/</code>**：同一份歌单配置，换成一个非吸底的大播放器——封面、歌词、完整歌单都在，适合专门坐下来听。为了让两边共用一份配置，我把迷你播放器脚本里的歌单配置和取数据逻辑挂到了 <code>window.miniMusic</code> 上，页面脚本直接调：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="variable language_">window</span>.<span class="property">miniMusic</span>.<span class="title function_">load</span>().<span class="title function_">then</span>(<span class="keyword">function</span> (<span class="params">list</span>) &#123;</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">APlayer</span>(&#123;</span><br><span class="line">    <span class="attr">container</span>: hall,</span><br><span class="line">    <span class="attr">audio</span>: list,</span><br><span class="line">    <span class="attr">lrcType</span>: <span class="number">3</span>,            <span class="comment">// 大播放器显示歌词</span></span><br><span class="line">    <span class="attr">listFolded</span>: <span class="literal">false</span>,</span><br><span class="line">    <span class="attr">listMaxHeight</span>: <span class="string">&#x27;420px&#x27;</span></span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>迷你播放器原本就排除了 <code>/music/</code> 路径，所以这一页不会同时冒出两个播放器。</p>
+<p><strong>右下角「随机前往一篇文章」</strong>：文章列表不用额外的接口——本地搜索用的 <code>search.xml</code> 里本来就有全部文章链接，取一次存进 <code>sessionStorage</code>，之后点按钮就是随机跳一个。按钮直接插进主题的 <code>#rightside</code>，尺寸、悬停变色、深色模式全都跟着主题走，一行 CSS 都不用写。</p>
+<p><strong>导航分组</strong>：顺便把导航改成了下拉分组。Butterfly 原生支持——<code>menu</code> 里某个键的值写成对象，就是一个下拉菜单：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">menu:</span></span><br><span class="line">  <span class="string">首页:</span> <span class="string">/</span> <span class="string">||</span> <span class="string">fas</span> <span class="string">fa-home</span></span><br><span class="line">  <span class="string">文章</span> <span class="string">||</span> <span class="attr">fas fa-book-open:</span></span><br><span class="line">    <span class="string">归档:</span> <span class="string">/archives/</span> <span class="string">||</span> <span class="string">fas</span> <span class="string">fa-archive</span></span><br><span class="line">    <span class="string">分类:</span> <span class="string">/categories/</span> <span class="string">||</span> <span class="string">fas</span> <span class="string">fa-folder-open</span></span><br><span class="line">    <span class="string">标签:</span> <span class="string">/tags/</span> <span class="string">||</span> <span class="string">fas</span> <span class="string">fa-tags</span></span><br><span class="line">  <span class="string">音乐馆:</span> <span class="string">/music/</span> <span class="string">||</span> <span class="string">fas</span> <span class="string">fa-music</span></span><br><span class="line">  <span class="string">关于:</span> <span class="string">/about/</span> <span class="string">||</span> <span class="string">fas</span> <span class="string">fa-user</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="改成你自己的"><a href="#改成你自己的" class="headerlink" title="改成你自己的"></a>改成你自己的</h2><table>
+<thead>
+<tr>
+<th>想改什么</th>
+<th>改哪里</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>换歌单</td>
+<td><code>source/js/music-player.js</code> 顶部 <code>CONFIG.id</code></td>
+</tr>
+<tr>
+<td>换配色</td>
+<td><code>_config.butterfly.yml</code> 里的 <code>--heo-main</code></td>
+</tr>
+<tr>
+<td>换平台</td>
+<td><code>CONFIG.server</code> 改成 <code>tencent</code>、<code>kugou</code> 等，<code>type</code> 也可以换成 <code>song</code> &#x2F; <code>album</code></td>
+</tr>
+<tr>
+<td>唱片大小 &#x2F; 离边距离</td>
+<td>CSS 开头的 <code>--mini-music-disc</code>、<code>--mini-music-gap</code></td>
+</tr>
+</tbody></table>
+<p>另外，在浏览器控制台里直接 <code>miniMusicPlayer.play()</code> 就能控制它，调样式的时候挺方便。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>整件事其实很简单：APlayer 负责好看，Meting 负责把歌单 ID 变成能播的地址，<code>inject</code> 负责让它出现在每个页面。麻烦的从来不是「接进来」，而是把它调成不挡视线、不打架、翻页不闹脾气——上面那 6 个坑基本都花在这上面了。</p>
+<p>现在它安安静静待在左下角，想听就转起来。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>建站</tag>
+        <tag>Butterfly</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>用 Hexo 搭建个人博客的完整记录</title>
+    <url>/2026/09/29/hexo-blog-setup/</url>
+    <content><![CDATA[<p>这篇记录了本站从零搭建的全过程，方便以后维护，也给想搭博客的朋友一个参考。</p>
+<span id="more"></span>
+
+<h2 id="环境要求"><a href="#环境要求" class="headerlink" title="环境要求"></a>环境要求</h2><ul>
+<li>Node.js 12+（推荐 18 以上）</li>
+<li>npm 或 yarn</li>
+</ul>
+<h2 id="搭建步骤"><a href="#搭建步骤" class="headerlink" title="搭建步骤"></a>搭建步骤</h2><h3 id="1-初始化项目"><a href="#1-初始化项目" class="headerlink" title="1. 初始化项目"></a>1. 初始化项目</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm init -y</span><br><span class="line">npm install hexo hexo-server hexo-deployer-git \</span><br><span class="line">  hexo-generator-index hexo-generator-archive \</span><br><span class="line">  hexo-generator-category hexo-generator-tag \</span><br><span class="line">  hexo-renderer-ejs hexo-renderer-marked</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-配置站点"><a href="#2-配置站点" class="headerlink" title="2. 配置站点"></a>2. 配置站点</h3><p>编辑 <code>_config.yml</code>，填入站点标题、作者、语言、时区等信息。</p>
+<h3 id="3-选择或编写主题"><a href="#3-选择或编写主题" class="headerlink" title="3. 选择或编写主题"></a>3. 选择或编写主题</h3><p>主题放在 <code>themes/</code> 目录下，本项目使用自研的 <code>aurora</code> 主题，结构如下：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">themes/aurora/</span><br><span class="line">├── layout/</span><br><span class="line">│   ├── layout.ejs      # 页面骨架</span><br><span class="line">│   ├── index.ejs       # 首页（文章列表）</span><br><span class="line">│   ├── post.ejs        # 文章详情</span><br><span class="line">│   ├── page.ejs        # 独立页面</span><br><span class="line">│   ├── archive.ejs     # 归档</span><br><span class="line">│   └── _partial/       # 公共片段</span><br><span class="line">└── source/</span><br><span class="line">    └── css/style.css   # 样式</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-写文章并生成"><a href="#4-写文章并生成" class="headerlink" title="4. 写文章并生成"></a>4. 写文章并生成</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo new <span class="string">&quot;文章标题&quot;</span>      <span class="comment"># 新建文章</span></span><br><span class="line">hexo generate            <span class="comment"># 生成静态文件</span></span><br><span class="line">hexo server              <span class="comment"># 本地预览 http://localhost:4000</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-部署上线"><a href="#5-部署上线" class="headerlink" title="5. 部署上线"></a>5. 部署上线</h3><p>在 <code>_config.yml</code> 的 <code>deploy</code> 中填入 Git 仓库地址，然后：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hexo deploy</span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令速查"><a href="#常用命令速查" class="headerlink" title="常用命令速查"></a>常用命令速查</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hexo new &lt;title&gt;</code></td>
+<td>新建文章</td>
+</tr>
+<tr>
+<td><code>hexo generate</code> &#x2F; <code>hexo g</code></td>
+<td>生成静态文件</td>
+</tr>
+<tr>
+<td><code>hexo server</code> &#x2F; <code>hexo s</code></td>
+<td>本地预览</td>
+</tr>
+<tr>
+<td><code>hexo deploy</code> &#x2F; <code>hexo d</code></td>
+<td>部署到远端</td>
+</tr>
+<tr>
+<td><code>hexo clean</code></td>
+<td>清理缓存</td>
+</tr>
+</tbody></table>
+<p>搭建博客最难的不是技术，而是开始写。祝大家都能拥有自己的小天地。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>建站</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Jev：面向软件自动化的 TypeSafe System One 模型</title>
+    <url>/2026/10/07/jev-system-one-model/</url>
+    <content><![CDATA[<p>最近关注到 TypeSafe AI 推出的 Jev。它并不是又一个面向聊天的通用大语言模型，而是专门为软件自动化设计的 <strong>System One Model</strong>：输入结构化的程序状态，输出预先定义好的类型化决策，并同时给出概率与置信度。</p>
+<span id="more"></span>
+
+<h2 id="Jev-解决的是什么问题"><a href="#Jev-解决的是什么问题" class="headerlink" title="Jev 解决的是什么问题"></a>Jev 解决的是什么问题</h2><p>传统大语言模型很擅长生成文字，但把文字接入业务系统时，通常还需要经过解析、校验和异常兜底。即使使用 JSON Schema 或结构化输出，也仍然要处理模型偏离预期、字段缺失以及过度自信等问题。</p>
+<p>Jev 的思路不同：它把模型输出设计成软件可以直接消费的决策，而不是一段需要人工阅读的长文本。问题的可能答案和输出结构在调用前就已经定义，业务代码可以据此继续执行。</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">程序状态（State）</span><br><span class="line">        ↓</span><br><span class="line">Typed Questions（类型化问题）</span><br><span class="line">        ↓</span><br><span class="line">结构化答案 + 概率/置信度</span><br><span class="line">        ↓</span><br><span class="line">业务规则、自动化流程或人工审核</span><br></pre></td></tr></table></figure>
+
+<h2 id="一次调用如何工作"><a href="#一次调用如何工作" class="headerlink" title="一次调用如何工作"></a>一次调用如何工作</h2><p>官方接口提供了 <code>systemOne</code> 能力。调用时传入模型、状态和一个或多个问题；问题可以是布尔判断、选项选择或评分等类型。</p>
+<p>例如，下面的 TypeScript 代码判断客户请求是否需要紧急处理：</p>
+<figure class="highlight ts"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; noul, <span class="title class_">TypeSafeClient</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;@typesafe-ai/sdk&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> client = <span class="keyword">new</span> <span class="title class_">TypeSafeClient</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> response = <span class="keyword">await</span> client.<span class="title function_">systemOne</span>(&#123;</span><br><span class="line">  <span class="attr">state</span>: <span class="string">&#x27;客户说生产服务已经中断。&#x27;</span>,</span><br><span class="line">  <span class="attr">questions</span>: &#123;</span><br><span class="line">    <span class="attr">urgent</span>: <span class="title function_">noul</span>(<span class="string">&#x27;这个请求是否紧急？&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(response.<span class="property">answers</span>.<span class="property">urgent</span>)</span><br></pre></td></tr></table></figure>
+
+<p>安装官方 JavaScript SDK：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">npm install @typesafe-ai/sdk</span><br></pre></td></tr></table></figure>
+
+<p>SDK 要求 Node.js 20 或更高版本，并从服务端环境变量 <code>TYPESAFE_API_KEY</code> 读取 API Key。也可以不使用 SDK，直接向下面的 HTTP 端点发起 <code>POST</code> 请求：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">https://api.typesafe.ai/v1/systemone</span><br></pre></td></tr></table></figure>
+
+<h2 id="为什么置信度很重要"><a href="#为什么置信度很重要" class="headerlink" title="为什么置信度很重要"></a>为什么置信度很重要</h2><p>自动化系统最怕的不是“模型偶尔答错”，而是“模型答错时仍然表现得非常确定”。Jev 为每个决策提供概率或置信度，这让业务系统可以把不确定性纳入流程设计：</p>
+<ul>
+<li><strong>高置信度</strong>：自动分类、路由或执行下一步动作。</li>
+<li><strong>中等置信度</strong>：进入二次规则校验，或补充更多上下文后重试。</li>
+<li><strong>低置信度</strong>：转人工审核，不让模型独自做决定。</li>
+</ul>
+<p>这并不意味着可以取消测试和监控。置信度应该用真实业务数据校准，并持续观察准确率、拒答率、延迟和成本。</p>
+<h2 id="适合哪些场景"><a href="#适合哪些场景" class="headerlink" title="适合哪些场景"></a>适合哪些场景</h2><p>Jev 更适合边界清晰、结果类型可以提前定义的任务，例如：</p>
+<ol>
+<li>工单分类与团队路由。</li>
+<li>风险、紧急程度或优先级判断。</li>
+<li>内容审核与规则触发。</li>
+<li>从一段输入中提取有限集合内的标签。</li>
+<li>在自动化流程中做“继续执行还是转人工”的决策。</li>
+</ol>
+<p>如果任务的核心是创作长文本、开放式对话、代码生成或图片生成，Jev 就不是最直接的选择。它的定位是“给软件使用的决策函数”，而不是“和人聊天的助手”。</p>
+<h2 id="推荐的生产部署方式"><a href="#推荐的生产部署方式" class="headerlink" title="推荐的生产部署方式"></a>推荐的生产部署方式</h2><p>Jev 是托管 API，不需要把模型下载到本地或自行维护 GPU 服务。比较稳妥的架构是让自己的后端调用 TypeSafe，而不是让浏览器直接调用：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">浏览器 / App</span><br><span class="line">      ↓</span><br><span class="line">自己的后端 API</span><br><span class="line">      ↓（服务端保存 TYPESAFE_API_KEY）</span><br><span class="line">TypeSafe Jev API</span><br></pre></td></tr></table></figure>
+
+<p>上线时建议至少做好这些事情：</p>
+<ul>
+<li>把 API Key 放在云平台 Secret 或 Secret Manager 中，不要提交到 Git。</li>
+<li>在后端增加身份认证、限流、超时和重试策略。</li>
+<li>记录请求耗时、结果类型和置信度，避免记录不必要的敏感原文。</li>
+<li>为高风险动作设置人工审核阈值。</li>
+<li>用一组固定的真实或脱敏样本做回归测试，防止问题悄悄进入生产。</li>
+</ul>
+<h2 id="需要留意的边界"><a href="#需要留意的边界" class="headerlink" title="需要留意的边界"></a>需要留意的边界</h2><p>“类型安全”主要解决输出结构和类型约束问题，不等于业务结果永远正确。模型仍然可能在任务理解、上下文缺失或领域知识方面判断失误。因此，类型校验、业务规则、权限控制和人工兜底仍然不可省略。</p>
+<p>另外，Jev 当前更适合 System One 形状的任务。面对需要长篇解释、复杂创作或持续多轮对话的问题，传统 LLM 可能更合适；在实际项目中，也可以让 Jev 负责快速决策，把需要解释的部分交给另一个模型。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>Jev 的价值不在于“替代所有大模型”，而在于提供一种更贴近软件工程的 AI 调用方式：定义输入状态和问题，获得结构化答案，再由代码决定下一步。对于分类、路由、审核和自动化决策，它值得作为传统 LLM 之外的一种方案进行评估。</p>
+<p>如果要开始尝试，建议先选一个低风险、结果容易衡量的内部流程，收集一批测试样本，再根据准确率、延迟、成本和人工介入率决定是否扩大使用范围。</p>
+<blockquote>
+<p>资料：</p>
+<ul>
+<li><a href="https://typesafe.ai/">TypeSafe AI 官方网站</a></li>
+<li><a href="https://jevplayground.com/jev-api">Jev API 与 SDK 快速开始</a></li>
+<li><a href="https://typesafe.ai/blog/introducing-system-one-models-and-jev">Introducing System One Models &amp; Jev</a></li>
+</ul>
+</blockquote>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>自动化</tag>
+        <tag>AI</tag>
+        <tag>TypeSafe</tag>
+        <tag>Jev</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo 博客发布手册：每次更新照这个来</title>
+    <url>/2026/10/01/hexo-publish-playbook/</url>
+    <content><![CDATA[<p>博客搭好之后，真正高频、也真正容易出错的其实是<strong>发布</strong>这个动作。这篇是一份可以照着敲的操作手册——不讲解原理，只给命令和排错表。</p>
+<p>搭建的完整过程见另一篇：<a href="/2026/10/01/build-blog-with-deepseek/">用 DeepSeek 从零搭建这个博客</a>。</p>
+<span id="more"></span>
+
+<h2 id="每次发布就这一块命令"><a href="#每次发布就这一块命令" class="headerlink" title="每次发布就这一块命令"></a>每次发布就这一块命令</h2><p>打开 CMD（Win+R 输入 <code>cmd</code>），把下面<strong>整块</strong>复制进去回车：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> &quot;<span class="built_in">PATH</span>=<span class="variable">%APPDATA%</span>\CherryStudio\Toolchain\mise\shims;<span class="variable">%PATH%</span>&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;HTTP_PROXY=http://<span class="number">127</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">7897</span>&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;HTTPS_PROXY=http://<span class="number">127</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">1</span>:<span class="number">7897</span>&quot;</span><br><span class="line"><span class="built_in">cd</span> /d I:\my-blog</span><br><span class="line">npx hexo clean &amp;&amp; npx hexo generate &amp;&amp; npx hexo d</span><br></pre></td></tr></table></figure>
+
+<p>四条命令，缺一不可：</p>
+<table>
+<thead>
+<tr>
+<th>行</th>
+<th>作用</th>
+<th>漏了会怎样</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第 1 行</td>
+<td>把 Node 加进 PATH</td>
+<td>报 <code>&#39;npx&#39; 不是内部或外部命令</code></td>
+</tr>
+<tr>
+<td>第 2、3 行</td>
+<td>让 git 走代理</td>
+<td>报 <code>Failed to connect to github.com port 443</code></td>
+</tr>
+<tr>
+<td>第 4 行</td>
+<td>进入项目目录</td>
+<td>在错误目录执行，找不到配置</td>
+</tr>
+<tr>
+<td>第 5 行</td>
+<td>清理 → 生成 → 部署</td>
+<td>——</td>
+</tr>
+</tbody></table>
+<p>看到这两行就是成功了：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">To https://github.com/qingjiu99/qingjiu99.github.io.git</span><br><span class="line">   0351040..3fe3373  HEAD -&gt; main</span><br><span class="line">INFO  Deploy done: git</span><br></pre></td></tr></table></figure>
+
+<p>然后<strong>等 1～2 分钟</strong>再刷新网站——GitHub Pages 需要重新构建，这一步不能省。</p>
+<h2 id="三个前置条件"><a href="#三个前置条件" class="headerlink" title="三个前置条件"></a>三个前置条件</h2><p>发布能不能成功，取决于这三样。出问题先查这里，再查命令。</p>
+<h3 id="1-Node-js-可用"><a href="#1-Node-js-可用" class="headerlink" title="1. Node.js 可用"></a>1. Node.js 可用</h3><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">node -v</span><br></pre></td></tr></table></figure>
+
+<p>报错就是没装，或者没进 PATH。</p>
+<p>如果用的是 Cherry Studio 自带的 Node，位置在 <code>%APPDATA%\CherryStudio\Toolchain\mise\shims</code>，<strong>每次开新终端都要重新 <code>set</code> 一次</strong>（上面命令块的第 1 行）。想省掉这步，去 <a href="https://nodejs.org/">nodejs.org</a> 装个 LTS 版，装完重启终端即可。</p>
+<h3 id="2-代理已启动"><a href="#2-代理已启动" class="headerlink" title="2. 代理已启动"></a>2. 代理已启动</h3><p>GitHub 直连不通，必须先开代理软件。</p>
+<p><strong>关键</strong>：光开着代理软件<strong>不一定够</strong>。git 底层用 libcurl，不一定读取系统代理设置，所以要用第 2、3 行显式指定端口。端口号填你代理软件的实际端口（Clash 常见 7890 &#x2F; 7897）。</p>
+<p>验证代理是否通：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -x http://127.0.0.1:7897 https://github.com</span><br></pre></td></tr></table></figure>
+
+<p>能返回内容就正常。不加 <code>-x</code> 参数测一次，如果直连不通、走代理通，就说明环境没问题。</p>
+<h3 id="3-仓库配置正确"><a href="#3-仓库配置正确" class="headerlink" title="3. 仓库配置正确"></a>3. 仓库配置正确</h3><p><code>_config.yml</code> 里：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/你的用户名/你的用户名.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">main</span></span><br></pre></td></tr></table></figure>
+
+<p>仓库名必须是 <strong><code>&lt;用户名&gt;.github.io</code></strong> 这种格式，这是 GitHub Pages 的命名规则。</p>
+<h2 id="完整发布流程"><a href="#完整发布流程" class="headerlink" title="完整发布流程"></a>完整发布流程</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">写文章 → 本地预览 → 生成 → 部署 → 等构建 → 刷新验证</span><br></pre></td></tr></table></figure>
+
+<h3 id="写文章"><a href="#写文章" class="headerlink" title="写文章"></a>写文章</h3><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">npx hexo new &quot;文章标题&quot;</span><br></pre></td></tr></table></figure>
+
+<p>文件生成在 <code>source\_posts\</code> 下。写完记得填 front-matter：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">date: 2026-10-01 23:55:00</span><br><span class="line">tags: [标签一, 标签二]</span><br><span class="line"><span class="section">categories: [分类]</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line">首页显示的摘要部分。</span><br><span class="line"></span><br><span class="line">&lt;!-- more --&gt;</span><br><span class="line"></span><br><span class="line">正文内容。</span><br></pre></td></tr></table></figure>
+
+<p><code>&lt;!-- more --&gt;</code> 是摘要分隔符，不写的话首页会把全文铺出来。</p>
+<blockquote>
+<p>文件名会变成网址的一部分，<strong>建议用英文或拼音</strong>，中文标题写在 <code>title</code> 里就好。</p>
+</blockquote>
+<h3 id="本地预览"><a href="#本地预览" class="headerlink" title="本地预览"></a>本地预览</h3><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">npx hexo server</span><br></pre></td></tr></table></figure>
+
+<p>打开 <code>http://localhost:4000</code> 看排版，确认后 <code>Ctrl+C</code> 停掉。<strong>这一步不需要代理</strong>，可以先在没网的情况下写完排版。</p>
+<h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">npx hexo clean &amp;&amp; npx hexo generate &amp;&amp; npx hexo d</span><br></pre></td></tr></table></figure>
+
+<p><code>generate</code> 成功会显示 <code>N files generated</code>。如果这一步就报错，说明是文章内容或配置的问题，和网络无关。</p>
+<h2 id="故障排查表"><a href="#故障排查表" class="headerlink" title="故障排查表"></a>故障排查表</h2><p>这张表是我实际踩过的坑，按”现象 → 原因 → 解决”排列：</p>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&#39;npx&#39; 不是内部或外部命令</code></td>
+<td>Node 不在 PATH</td>
+<td>命令块第 1 行不能漏</td>
+</tr>
+<tr>
+<td><code>Failed to connect to github.com port 443</code></td>
+<td>代理没开，或 git 没走代理</td>
+<td>开代理 + 保留 <code>HTTP_PROXY</code> &#x2F; <code>HTTPS_PROXY</code> 两行</td>
+</tr>
+<tr>
+<td>弹出 <code>Connect to GitHub</code> 授权窗口</td>
+<td>首次在新机器 &#x2F; 新环境发布时出现，凭据会缓存，之后通常不再弹</td>
+<td>保持「Browser&#x2F;Device」页，点 <strong>「Sign in with your browser」</strong></td>
+</tr>
+<tr>
+<td>登录窗口关不掉，但命令行已显示 <code>Deploy done</code></td>
+<td>GCM 的残留窗口，此时已无进程在等待它</td>
+<td><strong>直接点 ✕ 关掉</strong>，不要再点授权按钮</td>
+</tr>
+<tr>
+<td>网站显示的是旧内容 &#x2F; 别人的内容，新文章 404</td>
+<td>Pages 还在重建，看到的是上一次部署的旧站</td>
+<td><strong>等 1～2 分钟</strong>再刷新，别急着重配</td>
+</tr>
+<tr>
+<td>网站一直是 404</td>
+<td>仓库默认分支不是 <code>main</code></td>
+<td>仓库 Settings → Branches → 默认分支改为 <code>main</code></td>
+</tr>
+<tr>
+<td>内容确认已构建完成，但打开还是旧的</td>
+<td>浏览器缓存</td>
+<td><code>Ctrl+F5</code> 强制刷新</td>
+</tr>
+<tr>
+<td><code>Repository not found</code></td>
+<td>仓库名或账号不对</td>
+<td>检查 <code>_config.yml</code> 里的 <code>deploy.repo</code></td>
+</tr>
+</tbody></table>
+<p><strong>排查顺序建议</strong>：先看命令行输出到哪一步失败了，再对号入座查表。命令行有 <code>Deploy done</code> 但网站不对 → 问题在 Pages 构建或缓存；命令行就报错了 → 问题在环境或配置。</p>
+<h2 id="命令速查"><a href="#命令速查" class="headerlink" title="命令速查"></a>命令速查</h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+<th>需要代理？</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>npx hexo new &quot;标题&quot;</code></td>
+<td>新建文章</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo generate</code>（<code>g</code>）</td>
+<td>本地生成</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo server</code>（<code>s</code>）</td>
+<td>本地预览 <code>localhost:4000</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo clean</code></td>
+<td>清理缓存</td>
+<td>否</td>
+</tr>
+<tr>
+<td><code>npx hexo deploy</code>（<code>d</code>）</td>
+<td>部署到远端</td>
+<td><strong>是</strong></td>
+</tr>
+</tbody></table>
+<p>只有最后一步需要代理，写文章和预览都是纯本地的。</p>
+<hr>
+<p>把这块命令存成记事本放在手边，每次发布复制粘贴就行。发布这件事本身不难，难的是出错时知道问题出在哪一环——希望这张排查表能帮你省点时间。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>建站</tag>
+        <tag>GitHub Pages</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Markdown 常用语法速查（附我踩过的坑）</title>
+    <url>/2026/10/02/markdown-cheatsheet/</url>
+    <content><![CDATA[<p>写博客这些天，把常用的 Markdown 语法整理了一遍。这份速查表既是给自己以后翻，也给同样刚开始写的朋友省点事——顺带把我自己踩过的坑都记下来。</p>
+<span id="more"></span>
+
+<h2 id="为什么写这个"><a href="#为什么写这个" class="headerlink" title="为什么写这个"></a>为什么写这个</h2><p>Markdown 的设计理念是「用最少的符号，表达最基本的排版」。它没有复杂的菜单和按钮，所有格式都靠几个符号敲出来。</p>
+<p>好处是<strong>上手极快</strong>，坏处是<strong>有些符号长得像、容易记混</strong>——比如链接和图片只差一个感叹号。所以下面按用途分类整理，需要哪条查哪条。</p>
+<h2 id="一、标题"><a href="#一、标题" class="headerlink" title="一、标题"></a>一、标题</h2><p>用 <code>#</code> 表示层级，几个 <code>#</code> 就是几级标题：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="section"># 一级标题</span></span><br><span class="line"><span class="section">## 二级标题</span></span><br><span class="line"><span class="section">### 三级标题</span></span><br><span class="line"><span class="section">#### 四级标题</span></span><br></pre></td></tr></table></figure>
+
+<p>渲染效果就是本文这样，<code>##</code> 会带一条下划线分隔。</p>
+<blockquote>
+<p>⚠️ <strong><code>#</code> 后面必须有一个空格</strong>。写成 <code>#标题</code> 是不生效的，会原样显示出来。</p>
+</blockquote>
+<h2 id="二、强调"><a href="#二、强调" class="headerlink" title="二、强调"></a>二、强调</h2><table>
+<thead>
+<tr>
+<th>效果</th>
+<th>写法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>加粗</strong></td>
+<td><code>**加粗**</code></td>
+</tr>
+<tr>
+<td><em>斜体</em></td>
+<td><code>*斜体*</code></td>
+</tr>
+<tr>
+<td><em><strong>加粗斜体</strong></em></td>
+<td><code>***加粗斜体***</code></td>
+</tr>
+<tr>
+<td><del>删除线</del></td>
+<td><code>~~删除线~~</code></td>
+</tr>
+<tr>
+<td><code>行内代码</code></td>
+<td>用一对反引号 <code>`</code> 包起来</td>
+</tr>
+</tbody></table>
+<p>行内代码很适合写命令名、文件名、字段名，比如 <code>_config.yml</code>、<code>npx hexo d</code>。</p>
+<h2 id="三、链接与图片"><a href="#三、链接与图片" class="headerlink" title="三、链接与图片"></a>三、链接与图片</h2><p>这两个长得几乎一样，<strong>图片只多一个感叹号</strong>：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">[<span class="string">显示的文字</span>](<span class="link">https://example.com</span>)          ← 链接</span><br><span class="line">![<span class="string">替代文字</span>](<span class="link">https://example.com/a.png</span>)      ← 图片</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>链接</strong>：方括号里是点击时看到的文字</li>
+<li><strong>图片</strong>：方括号里是「替代文字」。图片加载不出来时会显示它，鼠标悬停时也会显示。<strong>圆括号里只能放图片网址</strong>。</li>
+</ul>
+<p>这是最容易写错的一条，我在下面「踩过的坑」里专门说了。</p>
+<h2 id="四、列表"><a href="#四、列表" class="headerlink" title="四、列表"></a>四、列表</h2><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="bullet">-</span> 无序列表</span><br><span class="line"><span class="bullet">-</span> 第二项</span><br><span class="line"><span class="bullet">  -</span> 缩进两个空格就是子列表</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> 有序列表</span><br><span class="line"><span class="bullet">2.</span> 第二项</span><br></pre></td></tr></table></figure>
+
+<p>列表项之间不空行，会渲染成紧凑的一坨；<strong>空一行就会变松散</strong>，行距更大。写文章按需选择。</p>
+<h2 id="五、引用"><a href="#五、引用" class="headerlink" title="五、引用"></a>五、引用</h2><p>用 <code>&gt;</code> 开头，适合放提示、补充说明：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="quote">&gt; 这是一段引用。</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>效果就是这样，左边会有一条竖线。</p>
+</blockquote>
+<h2 id="六、代码"><a href="#六、代码" class="headerlink" title="六、代码"></a>六、代码</h2><p><strong>行内代码</strong>用一对反引号包起来，比如 <code>_config.yml</code>、<code>npx hexo d</code>。</p>
+<p><strong>整段代码</strong>用三个反引号包住开头和结尾，并可以在开头的反引号后面标注语言，让关键词有高亮：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">hello</span>(<span class="params">name</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Hello, &#x27;</span> + name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>开头那个 <code>js</code> 就是语言标记，换成 <code>bash</code>、<code>cmd</code>、<code>yaml</code>、<code>markdown</code>、<code>text</code> 都可以。不标也能用，只是没有语法高亮。</p>
+<p>代码块渲染出来是带行号的，效果可以看<a href="/2026/10/01/hexo-publish-playbook/">这里</a>。</p>
+<h2 id="七、表格"><a href="#七、表格" class="headerlink" title="七、表格"></a>七、表格</h2><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">| 表头一 | 表头二 |</span><br><span class="line">| --- | --- |</span><br><span class="line">| 内容 | 内容 |</span><br></pre></td></tr></table></figure>
+
+<p>第二行的 <code>| --- | --- |</code> 是<strong>必须的</strong>，它告诉解析器这是表格而不是普通文字。</p>
+<blockquote>
+<p>💡 表格列数多的时候，与其在源码里对齐空格，不如随便写、让它自己渲染——源码对齐纯属自我感动，渲染出来都一样。</p>
+</blockquote>
+<h2 id="八、分割线"><a href="#八、分割线" class="headerlink" title="八、分割线"></a>八、分割线</h2><p>单独一行写三个减号：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>渲染出来是一条横线。</p>
+<blockquote>
+<p>⚠️ <strong>小心</strong>：文章<strong>开头</strong>如果出现 <code>---</code>，它表示的是 front-matter 的开始，不是分割线。所以正文里用分割线时，别放在第一行。</p>
+</blockquote>
+<h2 id="九、Hexo-专属的两个标记"><a href="#九、Hexo-专属的两个标记" class="headerlink" title="九、Hexo 专属的两个标记"></a>九、Hexo 专属的两个标记</h2><p>上面是通用 Markdown，下面这两条是 Hexo 特有的，<strong>只有写博客才用得到</strong>。</p>
+<h3 id="1-front-matter（文件开头那段）"><a href="#1-front-matter（文件开头那段）" class="headerlink" title="1. front-matter（文件开头那段）"></a>1. front-matter（文件开头那段）</h3><p>每篇文章<strong>必须</strong>以它开头，否则 Hexo 根本不认这篇文章：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">date: 2026-10-02 01:00:00</span><br><span class="line">tags: [随笔, 博客]</span><br><span class="line"><span class="section">categories: [生活]</span></span><br><span class="line"><span class="section">---</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>文章标题</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>决定排序，首页按时间倒序</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>标签，方括号包裹，多个用逗号隔开</td>
+</tr>
+<tr>
+<td><code>categories</code></td>
+<td>分类，写法同上</td>
+</tr>
+</tbody></table>
+<p>用 <code>npx hexo new &quot;标题&quot;</code> 建文件的话，这段骨架会自动生成好。</p>
+<h3 id="2-摘要分隔符"><a href="#2-摘要分隔符" class="headerlink" title="2. 摘要分隔符"></a>2. 摘要分隔符</h3><p>在摘要和正文之间，单独加一行 HTML 注释，内容是 <code>more</code> 这个词：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- more --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这行<strong>上面</strong>的内容会显示在首页列表里当摘要，<strong>下面</strong>的内容要点「阅读全文」才看得到。</p>
+<p>不写也能用，只是首页会把整篇全文铺出来，列表会变得很长。</p>
+<h2 id="十、我实际踩过的三个坑"><a href="#十、我实际踩过的三个坑" class="headerlink" title="十、我实际踩过的三个坑"></a>十、我实际踩过的三个坑</h2><p>这部分是重点，都是我真实踩到、而且<strong>不报错</strong>的坑——最难受的就是这种。</p>
+<h3 id="坑一：图片语法套娃"><a href="#坑一：图片语法套娃" class="headerlink" title="坑一：图片语法套娃"></a>坑一：图片语法套娃</h3><p>我一开始这么写：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">![<span class="string">AI辅助</span>](<span class="link">![截图.png](https://example.com/a.png</span>))</span><br></pre></td></tr></table></figure>
+
+<p>想的是「给图片加个替代文字，再写上文件名」。结果<strong>页面上是一张裂图</strong>。</p>
+<p>原因：解析器把圆括号里的 <code>![截图.png](https://...)</code> 整串当成了图片地址，于是生成了一个不存在的路径。</p>
+<p><strong>正确写法</strong>——圆括号里只放网址：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">![<span class="string">AI辅助</span>](<span class="link">https://example.com/a.png</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>记住</strong>：<code>![替代文字]</code> 和 <code>(图片地址)</code> 是<strong>一组</strong>，替代文字只能放方括号里，不能再套一层。</p>
+<h3 id="坑二：文章「消失」"><a href="#坑二：文章「消失」" class="headerlink" title="坑二：文章「消失」"></a>坑二：文章「消失」</h3><p>我在 <code>source\_posts\</code> 下新建了一个 <code>.md</code>，写得好好的，发布也显示成功，<strong>但文章就是不在网站上</strong>。</p>
+<p>原因：<strong>文件开头漏了 front-matter</strong>。Hexo 遇到没有 front-matter 的文件会<strong>直接跳过</strong>——不报错、不提示，静默忽略。</p>
+<p>所以遇到「发布成功但文章找不到」，第一件事就是检查文件头两行是不是 <code>---</code>。</p>
+<h3 id="坑三：段落之间必须空行"><a href="#坑三：段落之间必须空行" class="headerlink" title="坑三：段落之间必须空行"></a>坑三：段落之间必须空行</h3><p>Markdown 里<strong>一个换行不算换行</strong>。想让两段分开，中间必须空一行：</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">这是第一段。</span><br><span class="line">这是第二段。      ← 渲染后会和上面挤在同一段</span><br><span class="line"></span><br><span class="line">这是第一段。</span><br><span class="line"></span><br><span class="line">这是第二段。      ← 这样才对</span><br></pre></td></tr></table></figure>
+
+<p>这个坑很隐蔽，因为<strong>源码里看起来是分成两行的</strong>，但渲染出来变成了一坨。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Markdown 的语法一共就这么点东西，写个三五篇文章就熟练了。</p>
+<p>真正常用的其实只有四五个：标题、加粗、链接、图片、代码块。其余的记不住也没关系——需要的时候翻一下就行，比如现在这篇。</p>
+<hr>
+<p><strong>参考</strong>：本文的渲染效果可以直接对照<a href="/2026/10/01/build-blog-with-deepseek/">我的建站记录</a>，那篇里有更多实际写作用的例子。</p>
+]]></content>
+      <categories>
+        <category>技术</category>
+      </categories>
+      <tags>
+        <tag>Markdown</tag>
+        <tag>写作</tag>
+      </tags>
+  </entry>
+</search>

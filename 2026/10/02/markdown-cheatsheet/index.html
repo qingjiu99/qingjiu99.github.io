@@ -1,0 +1,341 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Markdown 常用语法速查（附我踩过的坑） | 清酒孤灯的博客</title><meta name="author" content="清酒孤灯"><meta name="copyright" content="清酒孤灯"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="写博客这些天，把常用的 Markdown 语法整理了一遍。这份速查表既是给自己以后翻，也给同样刚开始写的朋友省点事——顺带把我自己踩过的坑都记下来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Markdown 常用语法速查（附我踩过的坑）">
+<meta property="og:url" content="https://qingjiu99.github.io/2026/10/02/markdown-cheatsheet/index.html">
+<meta property="og:site_name" content="清酒孤灯的博客">
+<meta property="og:description" content="写博客这些天，把常用的 Markdown 语法整理了一遍。这份速查表既是给自己以后翻，也给同样刚开始写的朋友省点事——顺带把我自己踩过的坑都记下来。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://uapis.cn/api/v1/random/image?category=acg&type=mb">
+<meta property="article:published_time" content="2026-10-01T17:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-09T05:20:03.420Z">
+<meta property="article:author" content="清酒孤灯">
+<meta property="article:tag" content="Markdown">
+<meta property="article:tag" content="写作">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://uapis.cn/api/v1/random/image?category=acg&type=mb"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Markdown 常用语法速查（附我踩过的坑）",
+  "url": "https://qingjiu99.github.io/2026/10/02/markdown-cheatsheet/",
+  "image": "https://uapis.cn/api/v1/random/image?category=acg&type=mb",
+  "datePublished": "2026-10-01T17:00:00.000Z",
+  "dateModified": "2026-10-09T05:20:03.420Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "清酒孤灯",
+      "url": "https://qingjiu99.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://qingjiu99.github.io/2026/10/02/markdown-cheatsheet/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.7.1.260810"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.3.1/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        try {
+          const data = { value }
+
+          if (ttl != null) {
+            data.expiry = Date.now() + ttl * 86400000
+          }
+
+          localStorage.setItem(key, JSON.stringify(data))
+        } catch (e) {
+          console.error(e)
+        }
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Markdown 常用语法速查（附我踩过的坑）',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><style>:root{--heo-main:#4f6ef7;}</style><link rel="stylesheet" href="/vendor/aplayer/APlayer.min.css"><link rel="stylesheet" href="/css/music-player.css"><link rel="stylesheet" href="/css/footer.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar" loading='lazy'/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-book-open"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐馆</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://uapis.cn/api/v1/random/image?category=acg&amp;type=mb);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">清酒孤灯的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Markdown 常用语法速查（附我踩过的坑）</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-book-open"></i><span> 文章</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐馆</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-user"></i><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Markdown 常用语法速查（附我踩过的坑）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-01T17:00:00.000Z" title="发表于 2026-10-02 01:00:00">2026-10-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-09T05:20:03.420Z" title="更新于 2026-10-09 13:20:03">2026-10-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1720</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7 分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>写博客这些天，把常用的 Markdown 语法整理了一遍。这份速查表既是给自己以后翻，也给同样刚开始写的朋友省点事——顺带把我自己踩过的坑都记下来。</p>
+<span id="more"></span>
+
+<h2 id="为什么写这个"><a href="#为什么写这个" class="headerlink" title="为什么写这个"></a>为什么写这个</h2><p>Markdown 的设计理念是「用最少的符号，表达最基本的排版」。它没有复杂的菜单和按钮，所有格式都靠几个符号敲出来。</p>
+<p>好处是<strong>上手极快</strong>，坏处是<strong>有些符号长得像、容易记混</strong>——比如链接和图片只差一个感叹号。所以下面按用途分类整理，需要哪条查哪条。</p>
+<h2 id="一、标题"><a href="#一、标题" class="headerlink" title="一、标题"></a>一、标题</h2><p>用 <code>#</code> 表示层级，几个 <code>#</code> 就是几级标题：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># 一级标题</span></span><br><span class="line"><span class="section">## 二级标题</span></span><br><span class="line"><span class="section">### 三级标题</span></span><br><span class="line"><span class="section">#### 四级标题</span></span><br></pre></td></tr></table></figure>
+
+<p>渲染效果就是本文这样，<code>##</code> 会带一条下划线分隔。</p>
+<blockquote>
+<p>⚠️ <strong><code>#</code> 后面必须有一个空格</strong>。写成 <code>#标题</code> 是不生效的，会原样显示出来。</p>
+</blockquote>
+<h2 id="二、强调"><a href="#二、强调" class="headerlink" title="二、强调"></a>二、强调</h2><table>
+<thead>
+<tr>
+<th>效果</th>
+<th>写法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>加粗</strong></td>
+<td><code>**加粗**</code></td>
+</tr>
+<tr>
+<td><em>斜体</em></td>
+<td><code>*斜体*</code></td>
+</tr>
+<tr>
+<td><em><strong>加粗斜体</strong></em></td>
+<td><code>***加粗斜体***</code></td>
+</tr>
+<tr>
+<td><del>删除线</del></td>
+<td><code>~~删除线~~</code></td>
+</tr>
+<tr>
+<td><code>行内代码</code></td>
+<td>用一对反引号 <code>`</code> 包起来</td>
+</tr>
+</tbody></table>
+<p>行内代码很适合写命令名、文件名、字段名，比如 <code>_config.yml</code>、<code>npx hexo d</code>。</p>
+<h2 id="三、链接与图片"><a href="#三、链接与图片" class="headerlink" title="三、链接与图片"></a>三、链接与图片</h2><p>这两个长得几乎一样，<strong>图片只多一个感叹号</strong>：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">显示的文字</span>](<span class="link">https://example.com</span>)          ← 链接</span><br><span class="line">![<span class="string">替代文字</span>](<span class="link">https://example.com/a.png</span>)      ← 图片</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>链接</strong>：方括号里是点击时看到的文字</li>
+<li><strong>图片</strong>：方括号里是「替代文字」。图片加载不出来时会显示它，鼠标悬停时也会显示。<strong>圆括号里只能放图片网址</strong>。</li>
+</ul>
+<p>这是最容易写错的一条，我在下面「踩过的坑」里专门说了。</p>
+<h2 id="四、列表"><a href="#四、列表" class="headerlink" title="四、列表"></a>四、列表</h2><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> 无序列表</span><br><span class="line"><span class="bullet">-</span> 第二项</span><br><span class="line"><span class="bullet">  -</span> 缩进两个空格就是子列表</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> 有序列表</span><br><span class="line"><span class="bullet">2.</span> 第二项</span><br></pre></td></tr></table></figure>
+
+<p>列表项之间不空行，会渲染成紧凑的一坨；<strong>空一行就会变松散</strong>，行距更大。写文章按需选择。</p>
+<h2 id="五、引用"><a href="#五、引用" class="headerlink" title="五、引用"></a>五、引用</h2><p>用 <code>&gt;</code> 开头，适合放提示、补充说明：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="quote">&gt; 这是一段引用。</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>效果就是这样，左边会有一条竖线。</p>
+</blockquote>
+<h2 id="六、代码"><a href="#六、代码" class="headerlink" title="六、代码"></a>六、代码</h2><p><strong>行内代码</strong>用一对反引号包起来，比如 <code>_config.yml</code>、<code>npx hexo d</code>。</p>
+<p><strong>整段代码</strong>用三个反引号包住开头和结尾，并可以在开头的反引号后面标注语言，让关键词有高亮：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">hello</span>(<span class="params">name</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Hello, &#x27;</span> + name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>开头那个 <code>js</code> 就是语言标记，换成 <code>bash</code>、<code>cmd</code>、<code>yaml</code>、<code>markdown</code>、<code>text</code> 都可以。不标也能用，只是没有语法高亮。</p>
+<p>代码块渲染出来是带行号的，效果可以看<a href="/2026/10/01/hexo-publish-playbook/">这里</a>。</p>
+<h2 id="七、表格"><a href="#七、表格" class="headerlink" title="七、表格"></a>七、表格</h2><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">| 表头一 | 表头二 |</span><br><span class="line">| --- | --- |</span><br><span class="line">| 内容 | 内容 |</span><br></pre></td></tr></table></figure>
+
+<p>第二行的 <code>| --- | --- |</code> 是<strong>必须的</strong>，它告诉解析器这是表格而不是普通文字。</p>
+<blockquote>
+<p>💡 表格列数多的时候，与其在源码里对齐空格，不如随便写、让它自己渲染——源码对齐纯属自我感动，渲染出来都一样。</p>
+</blockquote>
+<h2 id="八、分割线"><a href="#八、分割线" class="headerlink" title="八、分割线"></a>八、分割线</h2><p>单独一行写三个减号：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>渲染出来是一条横线。</p>
+<blockquote>
+<p>⚠️ <strong>小心</strong>：文章<strong>开头</strong>如果出现 <code>---</code>，它表示的是 front-matter 的开始，不是分割线。所以正文里用分割线时，别放在第一行。</p>
+</blockquote>
+<h2 id="九、Hexo-专属的两个标记"><a href="#九、Hexo-专属的两个标记" class="headerlink" title="九、Hexo 专属的两个标记"></a>九、Hexo 专属的两个标记</h2><p>上面是通用 Markdown，下面这两条是 Hexo 特有的，<strong>只有写博客才用得到</strong>。</p>
+<h3 id="1-front-matter（文件开头那段）"><a href="#1-front-matter（文件开头那段）" class="headerlink" title="1. front-matter（文件开头那段）"></a>1. front-matter（文件开头那段）</h3><p>每篇文章<strong>必须</strong>以它开头，否则 Hexo 根本不认这篇文章：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">date: 2026-10-02 01:00:00</span><br><span class="line">tags: [随笔, 博客]</span><br><span class="line"><span class="section">categories: [生活]</span></span><br><span class="line"><span class="section">---</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>文章标题</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>决定排序，首页按时间倒序</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>标签，方括号包裹，多个用逗号隔开</td>
+</tr>
+<tr>
+<td><code>categories</code></td>
+<td>分类，写法同上</td>
+</tr>
+</tbody></table>
+<p>用 <code>npx hexo new &quot;标题&quot;</code> 建文件的话，这段骨架会自动生成好。</p>
+<h3 id="2-摘要分隔符"><a href="#2-摘要分隔符" class="headerlink" title="2. 摘要分隔符"></a>2. 摘要分隔符</h3><p>在摘要和正文之间，单独加一行 HTML 注释，内容是 <code>more</code> 这个词：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- more --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这行<strong>上面</strong>的内容会显示在首页列表里当摘要，<strong>下面</strong>的内容要点「阅读全文」才看得到。</p>
+<p>不写也能用，只是首页会把整篇全文铺出来，列表会变得很长。</p>
+<h2 id="十、我实际踩过的三个坑"><a href="#十、我实际踩过的三个坑" class="headerlink" title="十、我实际踩过的三个坑"></a>十、我实际踩过的三个坑</h2><p>这部分是重点，都是我真实踩到、而且<strong>不报错</strong>的坑——最难受的就是这种。</p>
+<h3 id="坑一：图片语法套娃"><a href="#坑一：图片语法套娃" class="headerlink" title="坑一：图片语法套娃"></a>坑一：图片语法套娃</h3><p>我一开始这么写：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![<span class="string">AI辅助</span>](<span class="link">![截图.png](https://example.com/a.png</span>))</span><br></pre></td></tr></table></figure>
+
+<p>想的是「给图片加个替代文字，再写上文件名」。结果<strong>页面上是一张裂图</strong>。</p>
+<p>原因：解析器把圆括号里的 <code>![截图.png](https://...)</code> 整串当成了图片地址，于是生成了一个不存在的路径。</p>
+<p><strong>正确写法</strong>——圆括号里只放网址：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![<span class="string">AI辅助</span>](<span class="link">https://example.com/a.png</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>记住</strong>：<code>![替代文字]</code> 和 <code>(图片地址)</code> 是<strong>一组</strong>，替代文字只能放方括号里，不能再套一层。</p>
+<h3 id="坑二：文章「消失」"><a href="#坑二：文章「消失」" class="headerlink" title="坑二：文章「消失」"></a>坑二：文章「消失」</h3><p>我在 <code>source\_posts\</code> 下新建了一个 <code>.md</code>，写得好好的，发布也显示成功，<strong>但文章就是不在网站上</strong>。</p>
+<p>原因：<strong>文件开头漏了 front-matter</strong>。Hexo 遇到没有 front-matter 的文件会<strong>直接跳过</strong>——不报错、不提示，静默忽略。</p>
+<p>所以遇到「发布成功但文章找不到」，第一件事就是检查文件头两行是不是 <code>---</code>。</p>
+<h3 id="坑三：段落之间必须空行"><a href="#坑三：段落之间必须空行" class="headerlink" title="坑三：段落之间必须空行"></a>坑三：段落之间必须空行</h3><p>Markdown 里<strong>一个换行不算换行</strong>。想让两段分开，中间必须空一行：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">这是第一段。</span><br><span class="line">这是第二段。      ← 渲染后会和上面挤在同一段</span><br><span class="line"></span><br><span class="line">这是第一段。</span><br><span class="line"></span><br><span class="line">这是第二段。      ← 这样才对</span><br></pre></td></tr></table></figure>
+
+<p>这个坑很隐蔽，因为<strong>源码里看起来是分成两行的</strong>，但渲染出来变成了一坨。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Markdown 的语法一共就这么点东西，写个三五篇文章就熟练了。</p>
+<p>真正常用的其实只有四五个：标题、加粗、链接、图片、代码块。其余的记不住也没关系——需要的时候翻一下就行，比如现在这篇。</p>
+<hr>
+<p><strong>参考</strong>：本文的渲染效果可以直接对照<a href="/2026/10/01/build-blog-with-deepseek/">我的建站记录</a>，那篇里有更多实际写作用的例子。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://qingjiu99.github.io">清酒孤灯</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://qingjiu99.github.io/2026/10/02/markdown-cheatsheet/">https://qingjiu99.github.io/2026/10/02/markdown-cheatsheet/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://qingjiu99.github.io" target="_blank">清酒孤灯的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Markdown/">Markdown</a><a class="post-meta__tags" href="/tags/%E5%86%99%E4%BD%9C/">写作</a></div><div class="post-share"><div class="social-share" data-image="https://uapis.cn/api/v1/random/image?category=acg&amp;type=mb" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/10/02/blog-web-admin-and-auto-deploy/" title="给博客装上网页后台和自动发布"><img class="cover" src="https://uapis.cn/api/v1/random/image?category=landscape&amp;type=mb" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post" loading='lazy'><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">给博客装上网页后台和自动发布</div></div><div class="info-2"><div class="info-item-1">博客上线之后，很快发现两个别扭的地方：只能在电脑上写，而且每次发布都要手动敲命令。这篇记录我怎么把这两个问题解决掉，顺便加上访问统计。   问题在哪静态博客有个天然的短板：没有后台。 WordPress 那种动态博客，打开 /wp-admin 就能写文章、传图片、改设置。而 Hexo 生成的是纯静态网页，服务器上只有 HTML 文件，没有数据库、没有登录界面、没有任何管理入口。 所以之前写一篇文章的流程是这样的： 123打开 VS Code → 改 Markdown → 存盘→ 切到 CMD → set 代理 → cd 项目 → npx hexo clean/generate/d→ 等 1-2 分钟 → 刷新网站确认  在家用电脑还行，出门在外想随手记点东西就完全没办法。 目标：手机上能写 + 提交后自动发布。 整体方案拆成三件事：    要解决的问题 方案    没有编辑界面 Pages CMS（网页版 Markdown 编辑器）   每次要手动发布 GitHub Actions（提交后自动构建发布）   不知道有没有人看 不蒜子（访问统计）   这三件事里，第二件是基础 ——...</div></div></div></a><a class="pagination-related" href="/2026/10/02/blog-homepage-rebuilt-with-ai/" title="记录一下我的博客主页搭建成功"><img class="cover" src="https://uapis.cn/api/v1/random/image" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post" loading='lazy'><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">记录一下我的博客主页搭建成功</div></div><div class="info-2"><div class="info-item-1">之前也搭建过个人博客，不过那会是自己买了云服务器，然后用WordPress进行建站的， WordPress优点是比较直观，主题也多随便更换，缺点是占内存比较多，优化不好的网站可能打开比较慢 服务器三年到期后就没有续费了，因为都是自己玩玩，写文章也不多，感觉纯属浪费。。。   这次AI这么火，我琢磨着诶，用AI帮我搞定博客的问题可不可以，结果花了一点点时间就给我布置好了  亲测DeepSeek比豆包聪明多了，一开始看豆包给了30天试用就用豆包试试了。豆包部署后用命令行出错，截图给豆包看要分析半天不出结果 换了DS后一会就给我把问题给揪出来并修复好了。 又可以开开心心的写文章了 这次部署到GitHub上的，也不需要续费服务器了，写一个简简单单的个人博客够用了！！ </div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar" loading='lazy'/></div><div class="author-info-name">清酒孤灯</div><div class="author-info-description">分享技术实践、AI 探索与生活思考</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/qingjiu99"><i class="fab fa-github"></i><span>访问 GitHub</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/qingjiu99" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到清酒孤灯的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%86%99%E8%BF%99%E4%B8%AA"><span class="toc-number">1.</span> <span class="toc-text">为什么写这个</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%A0%87%E9%A2%98"><span class="toc-number">2.</span> <span class="toc-text">一、标题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%BC%BA%E8%B0%83"><span class="toc-number">3.</span> <span class="toc-text">二、强调</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%93%BE%E6%8E%A5%E4%B8%8E%E5%9B%BE%E7%89%87"><span class="toc-number">4.</span> <span class="toc-text">三、链接与图片</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%88%97%E8%A1%A8"><span class="toc-number">5.</span> <span class="toc-text">四、列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%BC%95%E7%94%A8"><span class="toc-number">6.</span> <span class="toc-text">五、引用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E4%BB%A3%E7%A0%81"><span class="toc-number">7.</span> <span class="toc-text">六、代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E8%A1%A8%E6%A0%BC"><span class="toc-number">8.</span> <span class="toc-text">七、表格</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%88%86%E5%89%B2%E7%BA%BF"><span class="toc-number">9.</span> <span class="toc-text">八、分割线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81Hexo-%E4%B8%93%E5%B1%9E%E7%9A%84%E4%B8%A4%E4%B8%AA%E6%A0%87%E8%AE%B0"><span class="toc-number">10.</span> <span class="toc-text">九、Hexo 专属的两个标记</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-front-matter%EF%BC%88%E6%96%87%E4%BB%B6%E5%BC%80%E5%A4%B4%E9%82%A3%E6%AE%B5%EF%BC%89"><span class="toc-number">10.1.</span> <span class="toc-text">1. front-matter（文件开头那段）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%91%98%E8%A6%81%E5%88%86%E9%9A%94%E7%AC%A6"><span class="toc-number">10.2.</span> <span class="toc-text">2. 摘要分隔符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E6%88%91%E5%AE%9E%E9%99%85%E8%B8%A9%E8%BF%87%E7%9A%84%E4%B8%89%E4%B8%AA%E5%9D%91"><span class="toc-number">11.</span> <span class="toc-text">十、我实际踩过的三个坑</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%B8%80%EF%BC%9A%E5%9B%BE%E7%89%87%E8%AF%AD%E6%B3%95%E5%A5%97%E5%A8%83"><span class="toc-number">11.1.</span> <span class="toc-text">坑一：图片语法套娃</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%BA%8C%EF%BC%9A%E6%96%87%E7%AB%A0%E3%80%8C%E6%B6%88%E5%A4%B1%E3%80%8D"><span class="toc-number">11.2.</span> <span class="toc-text">坑二：文章「消失」</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%B8%89%EF%BC%9A%E6%AE%B5%E8%90%BD%E4%B9%8B%E9%97%B4%E5%BF%85%E9%A1%BB%E7%A9%BA%E8%A1%8C"><span class="toc-number">11.3.</span> <span class="toc-text">坑三：段落之间必须空行</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">12.</span> <span class="toc-text">结语</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/09/hexo-mini-music-player/" title="给博客加一个迷你音乐播放器"><img src="https://uapis.cn/api/v1/random/image?category=acg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="给博客加一个迷你音乐播放器" loading='lazy'/></a><div class="content"><a class="title" href="/2026/10/09/hexo-mini-music-player/" title="给博客加一个迷你音乐播放器">给博客加一个迷你音乐播放器</a><time datetime="2026-10-09T05:10:00.000Z" title="发表于 2026-10-09 13:10:00">2026-10-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/08/butterfly-random-cover-api/" title="为什么随机封面还是会重复：Butterfly 主题的去重机制分析"><img src="https://uapis.cn/api/v1/random/image?category=acg&amp;type=mb" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="为什么随机封面还是会重复：Butterfly 主题的去重机制分析" loading='lazy'/></a><div class="content"><a class="title" href="/2026/10/08/butterfly-random-cover-api/" title="为什么随机封面还是会重复：Butterfly 主题的去重机制分析">为什么随机封面还是会重复：Butterfly 主题的去重机制分析</a><time datetime="2026-10-07T18:30:00.000Z" title="发表于 2026-10-08 02:30:00">2026-10-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/07/hexo-butterfly-theme-migration/" title="我的 Hexo 博客换上 Butterfly 主题"><img src="https://uapis.cn/api/v1/random/image?category=anime" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我的 Hexo 博客换上 Butterfly 主题" loading='lazy'/></a><div class="content"><a class="title" href="/2026/10/07/hexo-butterfly-theme-migration/" title="我的 Hexo 博客换上 Butterfly 主题">我的 Hexo 博客换上 Butterfly 主题</a><time datetime="2026-10-07T05:30:00.000Z" title="发表于 2026-10-07 13:30:00">2026-10-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/07/jev-system-one-model/" title="Jev：面向软件自动化的 TypeSafe System One 模型"><img src="https://uapis.cn/api/v1/random/image?category=landscape" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Jev：面向软件自动化的 TypeSafe System One 模型" loading='lazy'/></a><div class="content"><a class="title" href="/2026/10/07/jev-system-one-model/" title="Jev：面向软件自动化的 TypeSafe System One 模型">Jev：面向软件自动化的 TypeSafe System One 模型</a><time datetime="2026-10-07T04:00:00.000Z" title="发表于 2026-10-07 12:00:00">2026-10-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/02/blog-web-admin-and-auto-deploy/" title="给博客装上网页后台和自动发布"><img src="https://uapis.cn/api/v1/random/image?category=landscape&amp;type=mb" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="给博客装上网页后台和自动发布" loading='lazy'/></a><div class="content"><a class="title" href="/2026/10/02/blog-web-admin-and-auto-deploy/" title="给博客装上网页后台和自动发布">给博客装上网页后台和自动发布</a><time datetime="2026-10-02T02:30:00.000Z" title="发表于 2026-10-02 10:30:00">2026-10-02</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 清酒孤灯</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 7.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.1.260810</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.1.260810"></script><script src="/js/main.js?v=5.7.1.260810"></script><div class="js-pjax"></div><script src="/vendor/aplayer/APlayer.min.js"></script><script src="/js/music-player.js"></script><script src="/js/random-post.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.1.260810"></script></div></div></body></html>
