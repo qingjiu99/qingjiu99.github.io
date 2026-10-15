@@ -1,0 +1,354 @@
+/* ==========================================================================
+   迷你音乐播放器（APlayer + Meting API · 网易云歌单）
+   --------------------------------------------------------------------------
+   形态：固定左下角的圆形唱片；播放时缓慢旋转；
+         点击唱片右侧的小箭头 → 展开成卡片（封面 + 歌名 + 进度 + 控制 + 歌单）
+   依赖：aplayer@1.10.1/dist/APlayer.min.css（由 _config.butterfly.yml → inject.head 引入）
+   配色：默认跟随 inject.head 里的 --heo-main（当前 #4f6ef7），改一处即可全局换色
+   ========================================================================== */
+
+:root {
+  --mini-music-color: var(--heo-main, #4f6ef7);
+  --mini-music-card: var(--card-bg, #fff);
+  --mini-music-disc: 62px;                /* 迷你唱片直径 */
+  --mini-music-gap: 22px;                 /* 与屏幕左下角的距离 */
+  --mini-music-width: 340px;              /* 展开后的卡片宽度 */
+  --mini-music-shadow: 0 10px 30px rgba(0, 0, 0, .18);
+}
+
+@media screen and (max-width: 768px) {
+  :root {
+    --mini-music-gap: 14px;
+    --mini-music-width: calc(100vw - 28px);
+  }
+}
+
+/* ---------- 屏蔽 APlayer 固定模式下铺满屏幕底部的歌词条 ---------- */
+.aplayer.mini-music .aplayer-lrc {
+  display: none !important;
+}
+
+/* ---------- 容器：固定左下角，本身不可见 ---------- */
+.aplayer.aplayer-fixed.mini-music {
+  left: var(--mini-music-gap);
+  right: auto;
+  bottom: var(--mini-music-gap);
+  width: var(--mini-music-width);
+  max-width: none;
+  background: transparent;
+  box-shadow: none;
+  z-index: 90;
+  font-family: inherit;
+}
+
+/* ---------- 播放器主体（两种形态共用） ---------- */
+.aplayer.aplayer-fixed.mini-music .aplayer-body {
+  left: var(--mini-music-gap);
+  bottom: var(--mini-music-gap);
+  right: auto;
+  max-width: none;
+  padding-right: 0;
+  background: var(--mini-music-card);
+  border-radius: 16px;
+  transition: all .25s ease;
+}
+
+/* ==========================================================================
+   一、迷你形态：圆形唱片
+   ========================================================================== */
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-body {
+  width: var(--mini-music-disc) !important;
+  height: var(--mini-music-disc);
+  background: transparent;
+  border-radius: 50%;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-pic {
+  width: var(--mini-music-disc);
+  height: var(--mini-music-disc);
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 0 3px var(--mini-music-card), 0 8px 22px rgba(0, 0, 0, .28);
+}
+
+/* 播放中：唱片缓慢旋转（播放/暂停按钮反向旋转，保持图标不歪） */
+@keyframes mini-music-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.aplayer.aplayer-fixed.mini-music[data-playing='1'].aplayer-narrow .aplayer-pic {
+  animation: mini-music-rotate 16s linear infinite;
+}
+
+.aplayer.aplayer-fixed.mini-music[data-playing='1'].aplayer-narrow .aplayer-pic .aplayer-button {
+  animation: mini-music-rotate 16s linear infinite reverse;
+}
+
+/* 唱片中央的播放/暂停：暂停时常显，播放时只在悬停时出现 */
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-pic .aplayer-button {
+  transition: opacity .25s ease;
+}
+
+/* APlayer 默认把暂停按钮放在封面的右下角，
+   唱片旋转时这个按钮会跟着绕圈，统一挪到正中央 */
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-pic .aplayer-play,
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-pic .aplayer-pause {
+  bottom: 50%;
+  right: 50%;
+  width: 26px;
+  height: 26px;
+  margin: 0 -15px -15px 0;
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-pic .aplayer-pause svg {
+  top: 5px;
+  left: 5px;
+  width: 12px;
+  height: 12px;
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow[data-playing='0'] .aplayer-pic .aplayer-button {
+  opacity: .9;
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow[data-playing='1'] .aplayer-pic .aplayer-button {
+  opacity: 0;
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-pic:hover .aplayer-button {
+  opacity: .95;
+}
+
+/* 唱片右侧的展开箭头 */
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-miniswitcher {
+  top: 50%;
+  right: -30px;
+  bottom: auto;
+  left: auto;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: var(--mini-music-card);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .22);
+  transition: transform .25s ease;
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-miniswitcher:hover {
+  transform: scale(1.12);
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-miniswitcher .aplayer-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.aplayer.aplayer-fixed.mini-music.aplayer-narrow .aplayer-miniswitcher .aplayer-icon path {
+  fill: var(--mini-music-color);
+}
+
+/* ==========================================================================
+   二、展开形态：卡片
+   ========================================================================== */
+
+.aplayer.aplayer-fixed.mini-music:not(.aplayer-narrow) .aplayer-body {
+  width: var(--mini-music-width) !important;
+  box-sizing: border-box;
+  /* 右侧留 18px 给收起箭头，APlayer 的图标定位就是按这个留白算的 */
+  padding-right: 18px;
+  border-radius: 16px;
+  box-shadow: var(--mini-music-shadow);
+  overflow: hidden;
+}
+
+.aplayer.aplayer-fixed.mini-music:not(.aplayer-narrow) .aplayer-pic {
+  border-radius: 16px 0 0 16px;
+}
+
+/* 收起箭头：沿用 APlayer 固定模式的右侧竖条，只改圆角与配色 */
+.aplayer.aplayer-fixed.mini-music:not(.aplayer-narrow) .aplayer-miniswitcher {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: 18px;
+  height: 100%;
+  margin: 0;
+  border-radius: 0 16px 16px 0;
+  background: rgba(128, 128, 128, .14);
+  transition: background .25s ease;
+}
+
+.aplayer.aplayer-fixed.mini-music:not(.aplayer-narrow) .aplayer-miniswitcher:hover {
+  background: rgba(128, 128, 128, .3);
+}
+
+.aplayer.aplayer-fixed.mini-music:not(.aplayer-narrow) .aplayer-miniswitcher .aplayer-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.aplayer.aplayer-fixed.mini-music:not(.aplayer-narrow) .aplayer-miniswitcher .aplayer-icon path {
+  fill: var(--mini-music-color);
+}
+
+/* 歌词按钮没有意义（歌词条已隐藏），藏掉保持整洁 */
+.aplayer.mini-music .aplayer-icon-lrc {
+  display: none !important;
+}
+
+/* 歌单面板：浮在卡片上方 */
+.aplayer.aplayer-fixed.mini-music .aplayer-list {
+  background: var(--mini-music-card);
+  border: none;
+  border-radius: 16px;
+  box-shadow: var(--mini-music-shadow);
+  margin-bottom: 84px;
+  overflow: hidden;
+}
+
+/* aplayer@1.10.1 会把 listMaxHeight 写成没有单位的 max-height（无效），
+   所以高度由这里决定；折叠靠 .aplayer-list-hide 的 max-height:0!important，两者不冲突 */
+.aplayer.aplayer-fixed.mini-music .aplayer-list ol {
+  max-height: 320px !important;
+}
+
+.aplayer.aplayer-fixed.mini-music .aplayer-list ol li {
+  color: inherit;
+}
+
+/* 进度条稍稍加粗 + 圆角 */
+.aplayer.mini-music .aplayer-bar,
+.aplayer.mini-music .aplayer-loaded,
+.aplayer.mini-music .aplayer-played {
+  border-radius: 3px;
+}
+
+/* 主题色跟随站点主色 */
+.aplayer.mini-music .aplayer-played,
+.aplayer.mini-music .aplayer-thumb,
+.aplayer.mini-music .aplayer-volume,
+.aplayer.mini-music .aplayer-list-cur {
+  background: var(--mini-music-color) !important;
+}
+
+.aplayer.mini-music .aplayer-list-cur {
+  border-radius: 3px;
+}
+
+/* ==========================================================================
+   三、暗色模式适配
+   ========================================================================== */
+
+[data-theme='dark'] .aplayer.mini-music .aplayer-author,
+[data-theme='dark'] .aplayer.mini-music .aplayer-time,
+[data-theme='dark'] .aplayer.mini-music .aplayer-list ol li .aplayer-list-index,
+[data-theme='dark'] .aplayer.mini-music .aplayer-list ol li .aplayer-list-author {
+  color: #a6a6a6;
+}
+
+[data-theme='dark'] .aplayer.mini-music .aplayer-bar {
+  background: rgba(255, 255, 255, .22);
+}
+
+[data-theme='dark'] .aplayer.mini-music .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon path {
+  fill: #d5d5d5;
+}
+
+[data-theme='dark'] .aplayer.mini-music .aplayer-list ol li {
+  border-top-color: rgba(255, 255, 255, .08);
+}
+
+[data-theme='dark'] .aplayer.mini-music .aplayer-list ol li:hover {
+  background: rgba(255, 255, 255, .08);
+}
+
+[data-theme='dark'] .aplayer.mini-music .aplayer-list ol li.aplayer-list-light {
+  background: rgba(255, 255, 255, .12);
+}
+
+[data-theme='dark'] .aplayer.mini-music .aplayer-list ol::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, .18);
+}
+
+/* ==========================================================================
+   四、音乐馆页面（/music/）
+   ========================================================================== */
+
+.music-hall {
+  margin: 0 auto;
+  max-width: 720px;
+}
+
+.music-hall .aplayer {
+  margin: 0;
+  border-radius: 12px;
+  font-family: inherit;
+}
+
+/* 大播放器的进度条/高亮同样跟随站点主色 */
+.music-hall .aplayer-played,
+.music-hall .aplayer-thumb,
+.music-hall .aplayer-volume,
+.music-hall .aplayer-list-cur {
+  background: var(--mini-music-color, #4f6ef7) !important;
+}
+
+.music-hall .aplayer-list ol li {
+  color: inherit;
+}
+
+.music-hall-tip {
+  margin: 0;
+  padding: 28px 0;
+  text-align: center;
+  color: var(--card-meta, #858585);
+  font-size: .9rem;
+}
+
+.music-hall.is-loading {
+  min-height: 96px;
+}
+
+[data-theme='dark'] .music-hall .aplayer {
+  background: var(--card-bg, #121212);
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-list ol li {
+  border-top-color: rgba(255, 255, 255, .08);
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-list ol li:hover {
+  background: rgba(255, 255, 255, .08);
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-list ol li.aplayer-list-light {
+  background: rgba(255, 255, 255, .12);
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-author,
+[data-theme='dark'] .music-hall .aplayer .aplayer-list ol li .aplayer-list-index,
+[data-theme='dark'] .music-hall .aplayer .aplayer-list ol li .aplayer-list-author {
+  color: #a6a6a6;
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-bar {
+  background: rgba(255, 255, 255, .22);
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon path {
+  fill: #d5d5d5;
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-lrc p {
+  color: #cfcfcf;
+}
+
+[data-theme='dark'] .music-hall .aplayer .aplayer-lrc p.aplayer-lrc-current {
+  color: #fff;
+}

@@ -1,0 +1,56 @@
+/* ==========================================================================
+   页脚配色：全部走 CSS 变量，跟着站点主色与明暗模式自动变化
+   --------------------------------------------------------------------------
+   主题原本把页脚背景写死成 $light-blue（暗色模式也不变），
+   链接 hover 又用的是同一个蓝色，等于蓝底叠蓝字。这里改掉。
+   ========================================================================== */
+
+:root {
+  /* 亮色：跟随 --heo-main（和播放器同一个主色），没有就退回主题按钮色 */
+  --footer-bg: var(--heo-main, var(--btn-bg, #49b1f5));
+  --footer-fg: rgba(255, 255, 255, .88);
+  --footer-fg-strong: #fff;
+}
+
+[data-theme='dark'] {
+  /* 暗色：收成深色面，主色只留在链接 hover 上，避免整块亮蓝 */
+  --footer-bg: #1b1b1b;
+  --footer-fg: rgba(255, 255, 255, .7);
+  --footer-fg-strong: var(--heo-main, #7d92ff);
+}
+
+#footer {
+  background-color: var(--footer-bg);
+  transition: background-color .3s ease, color .3s ease;
+}
+
+#footer > *,
+#footer a {
+  color: var(--footer-fg);
+}
+
+#footer a:hover {
+  color: var(--footer-fg-strong);
+}
+
+/* 版权那一行：在背景上再压一层，明暗两种模式各自成立 */
+#footer .footer-other {
+  background-color: rgba(0, 0, 0, .1);
+}
+
+[data-theme='dark'] #footer .footer-other {
+  background-color: rgba(255, 255, 255, .04);
+}
+
+#footer .footer-separator,
+#footer .icp-icon {
+  opacity: .8;
+}
+
+/* 切明暗模式时，页脚整体跟着做一次过渡，别突然闪一下 */
+#footer,
+#footer * {
+  transition-property: background-color, border-color, color;
+  transition-duration: .3s;
+  transition-timing-function: ease;
+}
